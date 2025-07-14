@@ -1,42 +1,81 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
-
 trigger:
 - main
 
-pool:
-  vmImage: ubuntu-latest
+# Definition der Pipeline-Stages
+stages:
+# === BUILD STAGE ===
+- stage: Build
+  displayName: 'Build Application'
+  jobs:
+  - job: BuildJob
+    displayName: 'Build Project'
+    pool:
+      vmImage: ubuntu-latest # Verwendet einen von Microsoft gehosteten Agent (Ubuntu)
 
-steps:
-- task: UsePythonVersion@0
-  displayName: 'Python-Version verwenden (3.11)'
-  inputs:
-    versionSpec: '3.11' # <-- Dies wurde auf 3.11 aktualisiert!
+    steps:
+    - task: UsePythonVersion@0
+      displayName: 'Python-Version verwenden (3.11)'
+      inputs:
+        versionSpec: '3.11' # Stellt sicher, dass Python 3.11 verwendet wird
 
-- script: |
-    python -m pip install --upgrade pip
-    pip install -r requirements.txt
-  displayName: 'Abhängigkeiten installieren'
-  workingDirectory: '$(Build.SourcesDirectory)' # Stellt sicher, dass `requirements.txt` gefunden wird
+    - script: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+      displayName: 'Abhängigkeiten installieren'
+      workingDirectory: '$(Build.SourcesDirectory)' # Stellt sicher, dass requirements.txt im Repo-Root gefunden wird
 
-# Wenn Ihr Projekt spezifische Build-Schritte hat, fügen Sie diese hier hinzu.
-# Für einfache Python-Web-Apps ist dies oft nicht notwendig, da 'pip install' genügt.
-# Beispiel (falls Sie z.B. eine Flask-App haben, die keine Kompilierung braucht):
-# - script: |
-#     echo "Keine spezifischen Build-Schritte erforderlich für diese Python-App."
-#   displayName: 'Build-Hinweis'
+    - task: ArchiveFiles@2
+      displayName: 'Dateien archivieren (Erstellen des Bereitstellungspakets)'
+      inputs:
+        rootFolderOrFile: '$(Build.SourcesDirectory)' # Archiviert den gesamten Quellcode
+        includeRootFolder: false # Archiviert den Inhalt, nicht den Ordner selbst
+        archiveType: 'zip' # Erstellt ein ZIP-Archiv
+        archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip' # Speichert die ZIP-Datei
+        replaceExistingArchive: true
 
-- task: ArchiveFiles@2
-  displayName: 'Dateien archivieren (Erstellen des Bereitstellungspakets)'
-  inputs:
-    rootFolderOrFile: '$(Build.SourcesDirectory)' # Dies archiviert den gesamten Quellcode
-    includeRootFolder: false # Archiviert den Inhalt des Ordners, nicht den Ordner selbst
-    archiveType: 'zip' # Erstellt eine ZIP-Datei
-    archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip' # Speicherort und Name des ZIP-Archivs
-    replaceExistingArchive: true
+    - publish: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
+      artifact: 'drop' # Veröffentlicht das Artefakt unter dem Namen 'drop'
+      displayName: 'Build-Artefakte veröffentlichen'
 
-- publish: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
-  artifact: 'drop' # Name des Artefakts
-  displayName: 'Build-Artefakte veröffentlichen' # Beschreibung des Schritts
+# === DEPLOY TO DEV STAGE ===
+- stage: DeployDev
+  displayName: 'Deploy to Dev Environment'
+  dependsOn: Build # Diese Stage startet erst, nachdem die 'Build'-Stage erfolgreich war
+  jobs:
+  - deployment: DeployDevApp
+    displayName: 'Deploy Web App to Dev'
+    environment: 'argo-referral-dev-webapp-tobias' # Name Ihres Azure App Service oder einer Azure DevOps Umgebung
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: AzureWebApp@1
+            displayName: 'Deploy Azure Web App to Dev'
+            inputs:
+              azureSubscription: 'Argo-Azure-Subscription-Connection' # Ihre bestehende Dienstverbindung
+              appType: 'webAppLinux' # Wichtig: Bestätigen Sie dies in Ihrem Azure App Service (Konfiguration -> Stapelsatzeinstellungen). Ändern Sie zu 'webApp', falls es Windows ist.
+              appName: 'argo-referral-dev-webapp-tobias' # Name Ihres Dev App Service
+              package: '$(Pipeline.Workspace)/drop/*.zip'
+              startupCommand: 'gunicorn --bind 0.0.0.0:8000 app:app' # <--- ANGEPASST FÜR FLASK!
+
+# === DEPLOY TO MVP STAGE ===
+- stage: DeployMVP
+  displayName: 'Deploy to MVP Environment'
+  dependsOn: DeployDev # Diese Stage startet erst, nachdem 'DeployDev' erfolgreich war
+  condition: succeeded('DeployDev') # Stellt sicher, dass DeployMVP nur bei Erfolg von DeployDev läuft
+  jobs:
+  - deployment: DeployMVPApp
+    displayName: 'Deploy Web App to MVP'
+    environment: 'argo-referral-mvp-webapp-tobias-20250709' # Name Ihres MVP App Service
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: AzureWebApp@1
+            displayName: 'Deploy Azure Web App to MVP'
+            inputs:
+              azureSubscription: 'Argo-Azure-Subscription-Connection' # Ihre bestehende Dienstverbindung
+              appType: 'webAppLinux' # Wichtig: Bestätigen Sie dies auch für Ihren MVP App Service.
+              appName: 'argo-referral-mvp-webapp-tobias-20250709' # Name Ihres MVP App Service
+              package: '$(Pipeline.Workspace)/drop/*.zip'
+              startupCommand: 'gunicorn --bind 0.0.0.0:8000 app:app' # <--- ANGEPASST FÜR FLASK!
