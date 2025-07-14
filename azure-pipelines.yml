@@ -1,0 +1,42 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- main
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+- task: UsePythonVersion@0
+  displayName: 'Python-Version verwenden (3.11)'
+  inputs:
+    versionSpec: '3.11' # <-- Dies wurde auf 3.11 aktualisiert!
+
+- script: |
+    python -m pip install --upgrade pip
+    pip install -r requirements.txt
+  displayName: 'Abhängigkeiten installieren'
+  workingDirectory: '$(Build.SourcesDirectory)' # Stellt sicher, dass `requirements.txt` gefunden wird
+
+# Wenn Ihr Projekt spezifische Build-Schritte hat, fügen Sie diese hier hinzu.
+# Für einfache Python-Web-Apps ist dies oft nicht notwendig, da 'pip install' genügt.
+# Beispiel (falls Sie z.B. eine Flask-App haben, die keine Kompilierung braucht):
+# - script: |
+#     echo "Keine spezifischen Build-Schritte erforderlich für diese Python-App."
+#   displayName: 'Build-Hinweis'
+
+- task: ArchiveFiles@2
+  displayName: 'Dateien archivieren (Erstellen des Bereitstellungspakets)'
+  inputs:
+    rootFolderOrFile: '$(Build.SourcesDirectory)' # Dies archiviert den gesamten Quellcode
+    includeRootFolder: false # Archiviert den Inhalt des Ordners, nicht den Ordner selbst
+    archiveType: 'zip' # Erstellt eine ZIP-Datei
+    archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip' # Speicherort und Name des ZIP-Archivs
+    replaceExistingArchive: true
+
+- publish: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
+  artifact: 'drop' # Name des Artefakts
+  displayName: 'Build-Artefakte veröffentlichen' # Beschreibung des Schritts
