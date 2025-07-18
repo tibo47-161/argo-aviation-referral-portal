@@ -45,6 +45,21 @@ class User(db.Model):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
+    def get_id(self):
+        return str(self.user_id)
+
+    @property
+    def is_authenticated(self):
+        return True
+
+    @property
+    def is_active(self):
+        return self.__dict__.get("is_active", True)
+
+    @property
+    def is_anonymous(self):
+        return False
+
 
 class JobListing(db.Model):
     __tablename__ = 'Job_Listings'
