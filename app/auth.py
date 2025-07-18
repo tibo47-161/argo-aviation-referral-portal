@@ -20,11 +20,15 @@ def register():
         first_name = request.form.get('first_name')
         last_name = request.form.get('last_name')
         phone_number = request.form.get('phone_number')
-        user_type_str = request.form.get('user_type') # Erwartet 'referrer', 'applicant' oder 'admin'
+        user_type = request.form.get('user_type') # Erwartet 'referrer', 'applicant' oder 'admin'
 
         # Einfache serverseitige Validierung der Eingabedaten
-        if not email or not password or not first_name or not last_name or not user_type_str:
+        if not email or not password or not first_name or not last_name or not user_type:
             flash('Alle Pflichtfelder müssen ausgefüllt werden!', 'danger')
+            return render_template('register.html')
+
+        if user_type not in ["referrer", "applicant", "admin"]:
+            flash('Ungültiger Benutzertyp ausgewählt.', 'danger')
             return render_template('register.html')
 
         # Überprüfen, ob die E-Mail-Adresse bereits in der Datenbank existiert
@@ -33,21 +37,13 @@ def register():
             flash('Diese E-Mail-Adresse ist bereits registriert.', 'warning')
             return render_template('register.html')
 
-        try:
-            # Konvertiere den String des Benutzertyps in das entsprechende Enum-Objekt
-            # Hier erhalten wir direkt den String-Wert, da UserType von SQLEnum erbt
-            user_type_value = UserType[user_type_str.upper()] # KORREKTUR: Umbenannt zu _value
-        except KeyError:
-            flash('Ungültiger Benutzertyp ausgewählt.', 'danger')
-            return render_template('register.html')
-
         # Erstelle ein neues User-Objekt und setze die Eigenschaften
         new_user = User(
             email=email,
             first_name=first_name,
             last_name=last_name,
             phone_number=phone_number,
-            user_type=user_type_value # KORREKTUR: .value entfernt
+            user_type=user_type
         )
         new_user.set_password(password) # Hashe das Passwort sicher
 
