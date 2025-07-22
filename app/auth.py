@@ -3,7 +3,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash
 # Importiere spezifische Funktionen von Flask-Login für Benutzerauthentifizierung
 from flask_login import login_user, logout_user, login_required, current_user
 from app import db # Importiere die SQLAlchemy-Datenbankinstanz
-from app.models import User, UserType # Importiere das User-Modell und die UserType Enum
+from app.models import User # Importiere das User-Modell
 
 auth_bp = Blueprint('auth', __name__) # Definiere einen Blueprint für Authentifizierungs-Routen
 
