@@ -1,3 +1,4 @@
+csrf_fixed_login.html
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -58,7 +59,7 @@
             color: #555; 
             font-weight: 500;
         }
-        input[type="email"], input[type="password"] {
+        input[type="email"], input[type="password"], input[type="hidden"] {
             width: calc(100% - 24px); 
             padding: 12px; 
             margin-bottom: 1.5rem; 
@@ -66,6 +67,9 @@
             border-radius: 8px;
             font-size: 1rem;
             transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        input[type="hidden"] {
+            display: none;
         }
         input[type="email"]:focus, input[type="password"]:focus {
             outline: none;
@@ -183,6 +187,10 @@
         {% endwith %}
         
         <form method="POST">
+            <!-- CSRF Token hinzugefügt -->
+            {{ csrf_token() }}
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            
             <label for="email">E-Mail-Adresse:</label>
             <input type="email" id="email" name="email" required placeholder="ihre.email@beispiel.de">
 
@@ -196,10 +204,11 @@
             <p><a href="{{ url_for('auth.register') }}">Noch kein Konto? Jetzt registrieren</a></p>
         </div>
         
-        <!-- Superadmin Info (nur für Demo/Entwicklung) -->
+        <!-- Superadmin Info -->
         <div class="superadmin-info">
             <h3>🔥 Superadmin-Zugang</h3>
-            <p>tobi196183@gmail.com hat automatisch Superadmin-Berechtigungen</p>
+            <p><strong>Zuerst registrieren:</strong> tobi196183@gmail.com<br>
+            <small>Wählen Sie ein sicheres Passwort bei der Registrierung</small></p>
         </div>
     </div>
 </body>
