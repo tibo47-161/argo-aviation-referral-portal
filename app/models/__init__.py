@@ -6,15 +6,7 @@ from sqlalchemy.dialects.mssql import UNIQUEIDENTIFIER, NVARCHAR, BIT, DATETIMEO
 from sqlalchemy import Enum as SQLEnum # Für Python-Enum-Typen
 from werkzeug.security import generate_password_hash, check_password_hash # Für Passwort-Hashing
 
-# Definition der UserType Enum (für Typsicherheit in Python)
-# class UserType(SQLEnum):
-#     REFERRER = "referrer"
-#     APPLICANT = "applicant"
-#     ADMIN = "admin"
 
-# --- Datenbank-Modelle definieren ---
-# Stellen Sie sicher, dass die Tabellennamen ('__tablename__') exakt mit denen übereinstimmen,
-# die Sie im Azure SQL Abfrage-Editor erstellt haben (Users, Job_Listings, Referrals).
 
 class User(db.Model):
     __tablename__ = 'Users'

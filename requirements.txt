@@ -1,0 +1,42 @@
+# KORRIGIERTE requirements.txt für Argo Aviation Referral Portal
+
+# Flask Core
+Flask==2.3.3
+Flask-SQLAlchemy==3.0.5
+Flask-Migrate==4.0.5
+
+# Authentication & Security
+Flask-Login==0.6.3
+Flask-WTF==1.1.1
+WTForms==3.0.1
+Werkzeug==2.3.7
+
+# Database
+pyodbc==4.0.39
+SQLAlchemy==2.0.21
+
+# Configuration & Environment
+python-dotenv==1.0.0
+
+# Development & Debugging
+Flask-DebugToolbar==0.13.1
+
+# Production Server (optional)
+gunicorn==21.2.0
+
+# Validation & Forms
+email-validator==2.0.0
+
+# Security
+cryptography==41.0.4
+
+# Utilities
+python-dateutil==2.8.2
+
+# Testing (optional)
+pytest==7.4.2
+pytest-flask==1.2.0
+
+# Azure Integration (optional)
+azure-identity==1.14.0
+azure-keyvault-secrets==4.7.0
