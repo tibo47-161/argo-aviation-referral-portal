@@ -1,76 +1,81 @@
-﻿# app/models/__init__.py
-import uuid # Benötigt für UUID-Generierung
-from datetime import datetime # Benötigt für datetime.utcnow (falls verwendet)
-from .. import db # Importiert die db-Instanz aus dem übergeordneten Modul (app/__init__.py)
-from sqlalchemy.dialects.mssql import UNIQUEIDENTIFIER, NVARCHAR, BIT, DATETIMEOFFSET, DECIMAL, TEXT # Spezifische SQL Server Typen
-from sqlalchemy import Enum as SQLEnum # Für Python-Enum-Typen
-from werkzeug.security import generate_password_hash, check_password_hash # Für Passwort-Hashing
+﻿# app/models/__init__.py - SQL Server optimiert
+import uuid
+from datetime import datetime
+from flask_login import UserMixin
+from app import db
+from werkzeug.security import generate_password_hash, check_password_hash
 
-
-
-class User(db.Model):
+class User(UserMixin, db.Model):
     __tablename__ = 'Users'
-    # KORREKTUR: UUID wird in Python generiert und explizit als uuid.UUID-Objekt gespeichert.
-    # SQLAlchemy und pyodbc sollten dies dann korrekt in UNIQUEIDENTIFIER konvertieren.
-    user_id = db.Column(UNIQUEIDENTIFIER, primary_key=True, default=lambda: uuid.uuid4()) # WICHTIGE KORREKTUR
-    email = db.Column(NVARCHAR(255), unique=True, nullable=False)
-    password_hash = db.Column(NVARCHAR(255), nullable=False) # Länge für Hashes
-    first_name = db.Column(NVARCHAR(100), nullable=False)
-    last_name = db.Column(NVARCHAR(100), nullable=False)
-    phone_number = db.Column(NVARCHAR(20))
-    registration_date = db.Column(DATETIMEOFFSET, default=db.func.GETUTCDATE())
-    last_login = db.Column(DATETIMEOFFSET)
-    is_active = db.Column(BIT, default=True)
-    user_type = db.Column(NVARCHAR(50), nullable=False)
+    
+    # SQL Server UNIQUEIDENTIFIER für bessere Performance
+    user_id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    email = db.Column(db.String(255), unique=True, nullable=False)
+    password_hash = db.Column(db.String(255), nullable=False)
+    first_name = db.Column(db.String(100), nullable=False)
+    last_name = db.Column(db.String(100), nullable=False)
+    phone_number = db.Column(db.String(20))
+    
+    # DATETIMEOFFSET für SQL Server Zeitzone-Unterstützung
+    registration_date = db.Column(db.DateTime, default=datetime.utcnow)
+    last_login = db.Column(db.DateTime)
+    is_active = db.Column(db.Boolean, default=True)
 
-    # Beziehungen (optional, aber gut für Navigation)
-    referrals_made = db.relationship('Referral', backref='referrer_user', lazy=True, foreign_keys='Referral.referrer_id', overlaps="referrer_obj")
-
+    # Beziehungen
+    referrals_made = db.relationship('Referral', backref='referrer_user', lazy=True, 
+                                   foreign_keys='Referral.referrer_id')
 
     def __repr__(self):
-        return f"User('{self.email}', '{self.user_type}')"
+        return f"User('{self.email}')"
 
-    # Methoden zum Hashen und Überprüfen von Passwörtern
+    # Flask-Login erforderliche Methoden
+    def get_id(self):
+        return str(self.user_id)
+    
+    @property
+    def is_authenticated(self):
+        return True
+    
+    @property
+    def is_active_user(self):
+        return bool(self.is_active)
+    
+    @property
+    def is_anonymous(self):
+        return False
+
+    # Passwort-Methoden
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
-    def get_id(self):
-        return str(self.user_id)
-
-    @property
-    def is_authenticated(self):
-        return True
-
-    @property
-    def is_active(self):
-        return self.__dict__.get("is_active", True)
-
-    @property
-    def is_anonymous(self):
-        return False
-
 
 class JobListing(db.Model):
     __tablename__ = 'Job_Listings'
-    job_id = db.Column(UNIQUEIDENTIFIER, primary_key=True, default=lambda: uuid.uuid4()) # KORREKTUR
-    title = db.Column(NVARCHAR(255), nullable=False)
-    description = db.Column(NVARCHAR(max)) # NVARCHAR(MAX) in SQL Server
-    requirements = db.Column(NVARCHAR(max))
-    location = db.Column(NVARCHAR(255), nullable=False)
-    salary_range = db.Column(NVARCHAR(100))
-    employment_type = db.Column(NVARCHAR(50)) # 'full-time', 'part-time', 'contract'
-    department = db.Column(NVARCHAR(100))
-    posting_date = db.Column(DATETIMEOFFSET, default=db.func.GETUTCDATE())
-    expiry_date = db.Column(DATETIMEOFFSET)
-    is_active = db.Column(BIT, default=True)
-    referral_bonus = db.Column(DECIMAL(10, 2))
+    
+    job_id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    title = db.Column(db.String(255), nullable=False)
+    
+    # TEXT für große Textfelder - SQL Server kompatibel
+    description = db.Column(db.Text)
+    requirements = db.Column(db.Text)
+    
+    location = db.Column(db.String(255), nullable=False)
+    salary_range = db.Column(db.String(100))
+    employment_type = db.Column(db.String(50))
+    department = db.Column(db.String(100))
+    posting_date = db.Column(db.DateTime, default=datetime.utcnow)
+    expiry_date = db.Column(db.DateTime)
+    is_active = db.Column(db.Boolean, default=True)
+    
+    # DECIMAL für Geldbeträge
+    referral_bonus = db.Column(db.Numeric(10, 2))
 
-    # Beziehungen (optional)
-    referrals_for_job = db.relationship('Referral', backref='job_listing', lazy=True, foreign_keys='Referral.job_id', overlaps="job_obj")
-
+    # Beziehungen
+    referrals_for_job = db.relationship('Referral', backref='job_listing', lazy=True, 
+                                      foreign_keys='Referral.job_id')
 
     def __repr__(self):
         return f"JobListing('{self.title}', '{self.location}')"
@@ -78,21 +83,20 @@ class JobListing(db.Model):
 
 class Referral(db.Model):
     __tablename__ = 'Referrals'
-    referral_id = db.Column(UNIQUEIDENTIFIER, primary_key=True, default=lambda: uuid.uuid4()) # KORREKTUR
-    referrer_id = db.Column(UNIQUEIDENTIFIER, db.ForeignKey('Users.user_id'), nullable=False)
-    job_id = db.Column(UNIQUEIDENTIFIER, db.ForeignKey('Job_Listings.job_id'), nullable=False)
-    applicant_email = db.Column(NVARCHAR(255), nullable=False)
-    applicant_name = db.Column(NVARCHAR(255), nullable=False)
-    referral_date = db.Column(DATETIMEOFFSET, default=db.func.GETUTCDATE())
-    status = db.Column(NVARCHAR(50), nullable=False) # 'pending', 'reviewed', 'hired', 'rejected'
-    notes = db.Column(NVARCHAR(max))
-    commission_amount = db.Column(DECIMAL(10, 2))
-    commission_paid = db.Column(BIT, default=False)
-
-    # Beziehungen: explizite Definitionen für den Zugriff auf die verknüpften Objekte
-    referrer_obj = db.relationship('User', foreign_keys=[referrer_id], overlaps="referrals_made")
-    job_obj = db.relationship('JobListing', foreign_keys=[job_id], overlaps="referrals_for_job")
-
+    
+    referral_id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    referrer_id = db.Column(db.String(36), db.ForeignKey('Users.user_id'), nullable=False)
+    job_id = db.Column(db.String(36), db.ForeignKey('Job_Listings.job_id'), nullable=False)
+    applicant_email = db.Column(db.String(255), nullable=False)
+    applicant_name = db.Column(db.String(255), nullable=False)
+    referral_date = db.Column(db.DateTime, default=datetime.utcnow)
+    status = db.Column(db.String(50), nullable=False)
+    
+    # TEXT für Notizen - SQL Server kompatibel
+    notes = db.Column(db.Text)
+    
+    commission_amount = db.Column(db.Numeric(10, 2))
+    commission_paid = db.Column(db.Boolean, default=False)
 
     def __repr__(self):
         return f"Referral('{self.applicant_name}', '{self.status}')"
