@@ -7,6 +7,22 @@ from app.models import User # Importiere das User-Modell
 
 auth_bp = Blueprint('auth', __name__) # Definiere einen Blueprint für Authentifizierungs-Routen
 
+# Superadmin-Konfiguration
+SUPERADMIN_EMAIL = "tobi196183@gmail.com"
+
+def is_superadmin(email):
+    """Überprüft, ob die E-Mail-Adresse ein Superadmin ist"""
+    return email.lower() == SUPERADMIN_EMAIL.lower()
+
+def setup_superadmin_if_needed(user):
+    """Setzt Superadmin-Eigenschaften für die spezielle E-Mail-Adresse"""
+    if is_superadmin(user.email):
+        # Hier können Sie zusätzliche Superadmin-Eigenschaften setzen
+        # Zum Beispiel: user.is_admin = True, user.permissions = 'all', etc.
+        flash(f'Willkommen zurück, Superadmin {user.first_name}!', 'success')
+        return True
+    return False
+
 @auth_bp.route('/register', methods=['GET', 'POST'])
 def register():
     # Wenn der Benutzer bereits angemeldet ist, leite ihn zum Dashboard um
@@ -20,15 +36,15 @@ def register():
         first_name = request.form.get('first_name')
         last_name = request.form.get('last_name')
         phone_number = request.form.get('phone_number')
-        user_type = request.form.get('user_type') # Erwartet 'referrer', 'applicant' oder 'admin'
 
         # Einfache serverseitige Validierung der Eingabedaten
-        if not email or not password or not first_name or not last_name or not user_type:
+        if not email or not password or not first_name or not last_name:
             flash('Alle Pflichtfelder müssen ausgefüllt werden!', 'danger')
             return render_template('register.html')
 
-        if user_type not in ["referrer", "applicant", "admin"]:
-            flash('Ungültiger Benutzertyp ausgewählt.', 'danger')
+        # Passwort-Validierung
+        if len(password) < 6:
+            flash('Das Passwort muss mindestens 6 Zeichen lang sein.', 'danger')
             return render_template('register.html')
 
         # Überprüfen, ob die E-Mail-Adresse bereits in der Datenbank existiert
@@ -42,15 +58,23 @@ def register():
             email=email,
             first_name=first_name,
             last_name=last_name,
-            phone_number=phone_number,
-            user_type=user_type
+            phone_number=phone_number
         )
         new_user.set_password(password) # Hashe das Passwort sicher
+
+        # Superadmin-Check
+        if is_superadmin(email):
+            flash(f'Superadmin-Account für {email} wird erstellt!', 'success')
 
         try:
             db.session.add(new_user) # Füge den neuen Benutzer zur Datenbank-Session hinzu
             db.session.commit() # Speichere die Änderungen in der Datenbank
-            flash('Registrierung erfolgreich! Sie können sich jetzt anmelden.', 'success')
+            
+            if is_superadmin(email):
+                flash('Superadmin-Registrierung erfolgreich! Sie haben erweiterte Berechtigungen.', 'success')
+            else:
+                flash('Registrierung erfolgreich! Sie können sich jetzt anmelden.', 'success')
+            
             return redirect(url_for('auth.login')) # Leite zur Login-Seite um
         except Exception as e:
             db.session.rollback() # Mache Änderungen rückgängig, falls ein Fehler auftritt
@@ -76,7 +100,14 @@ def login():
         # Überprüfe, ob der Benutzer existiert und das Passwort korrekt ist
         if user and user.check_password(password):
             login_user(user) # Meldet den Benutzer über Flask-Login an und verwaltet die Session
-            flash('Erfolgreich angemeldet!', 'success')
+            
+            # Superadmin-Check beim Login
+            if setup_superadmin_if_needed(user):
+                # Zusätzliche Superadmin-Logik hier
+                pass
+            else:
+                flash('Erfolgreich angemeldet!', 'success')
+            
             # Leite den Benutzer zur 'next' Seite (falls vorhanden) oder zum Standard-Dashboard um
             next_page = request.args.get('next')
             return redirect(next_page or url_for('main.dashboard'))
@@ -91,3 +122,11 @@ def logout():
     logout_user() # Meldet den aktuellen Benutzer von der Session ab
     flash('Sie wurden abgemeldet.', 'info')
     return redirect(url_for('auth.login')) # Leite zur Login-Seite um nach dem Abmelden
+
+# Hilfsfunktion für Templates
+@auth_bp.app_template_global()
+def is_current_user_superadmin():
+    """Template-Funktion um zu prüfen, ob der aktuelle Benutzer ein Superadmin ist"""
+    if current_user.is_authenticated:
+        return is_superadmin(current_user.email)
+    return False

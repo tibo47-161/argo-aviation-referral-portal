@@ -9,7 +9,7 @@
         .container { background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); max-width: 500px; margin: auto; }
         h1 { text-align: center; color: #333; }
         label { display: block; margin-bottom: 5px; color: #555; }
-        input[type="email"], input[type="password"], input[type="text"], select {
+        input[type="email"], input[type="password"], input[type="text"] {
             width: calc(100% - 22px); padding: 10px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px;
         }
         button {
@@ -20,11 +20,20 @@
         .flash-message.danger { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
         .flash-message.success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
         .flash-message.warning { background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+        .info-box { background-color: #e7f3ff; border: 1px solid #b3d9ff; padding: 15px; border-radius: 4px; margin-bottom: 20px; }
+        .info-box h3 { margin-top: 0; color: #0066cc; }
+        .info-box p { margin-bottom: 0; color: #004499; }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Registrieren</h1>
+        
+        <div class="info-box">
+            <h3>🚀 Willkommen bei Argo Aviation Referral Portal</h3>
+            <p>Registrieren Sie sich, um Teil unseres professionellen Referral-Netzwerks zu werden. Nach der Registrierung können Sie Stellenausschreibungen einsehen und qualifizierte Kandidaten empfehlen.</p>
+        </div>
+        
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
@@ -32,6 +41,7 @@
                 {% endfor %}
             {% endif %}
         {% endwith %}
+        
         <form method="POST">
             <label for="first_name">Vorname:</label>
             <input type="text" id="first_name" name="first_name" required>
@@ -43,22 +53,18 @@
             <input type="email" id="email" name="email" required>
 
             <label for="password">Passwort:</label>
-            <input type="password" id="password" name="password" required>
+            <input type="password" id="password" name="password" required minlength="6">
 
             <label for="phone_number">Telefonnummer (optional):</label>
-            <input type="text" id="phone_number" name="phone_number">
-
-            <label for="user_type">Benutzertyp:</label>
-            <select id="user_type" name="user_type" required>
-                <option value="">Bitte auswählen</option>
-                <option value="referrer">Referrer</option>
-                <option value="applicant">Applicant</option>
-                <option value="admin">Admin</option>
-            </select>
+            <input type="text" id="phone_number" name="phone_number" placeholder="+49 123 456789">
 
             <button type="submit">Registrieren</button>
         </form>
-        <p style="text-align: center; margin-top: 15px;"><a href="{{ url_for('auth.login') }}">Bereits ein Konto? Hier anmelden.</a></p>
+        
+        <p style="text-align: center; margin-top: 15px;">
+            <a href="{{ url_for('auth.login') }}">Bereits ein Konto? Hier anmelden.</a>
+        </p>
     </div>
 </body>
 </html>
+
