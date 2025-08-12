@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Benutzerverwaltung</title>
+  <style>
+    body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;margin:0;padding:0;background:#f8fafc}
+    .container{max-width:1100px;margin:2rem auto;padding:0 1rem}
+    table{width:100%;border-collapse:collapse;background:#fff;box-shadow:0 10px 30px rgba(0,0,0,.08);border-radius:12px;overflow:hidden}
+    th,td{padding:.8rem;border-bottom:1px solid #e2e8f0;text-align:left}
+    th{background:#f1f5f9}
+    .badge{padding:.2rem .5rem;border-radius:8px;background:#e2e8f0}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Benutzerverwaltung</h1>
+    {% if users and users.items %}
+      <table>
+        <thead><tr><th>Name</th><th>E-Mail</th><th>Status</th></tr></thead>
+        <tbody>
+          {% for u in users.items %}
+            <tr>
+              <td>{{ u.first_name }} {{ u.last_name }}</td>
+              <td>{{ u.email }}</td>
+              <td><span class="badge">{{ 'Aktiv' if u.is_active else 'Inaktiv' }}</span></td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p>Keine Benutzer gefunden.</p>
+    {% endif %}
+  </div>
+</body>
+</html>
+
+

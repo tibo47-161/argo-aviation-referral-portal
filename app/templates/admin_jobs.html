@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Job-Verwaltung</title>
+  <style>
+    body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;margin:0;padding:0;background:#f8fafc}
+    .container{max-width:1100px;margin:2rem auto;padding:0 1rem}
+    table{width:100%;border-collapse:collapse;background:#fff;box-shadow:0 10px 30px rgba(0,0,0,.08);border-radius:12px;overflow:hidden}
+    th,td{padding:.8rem;border-bottom:1px solid #e2e8f0;text-align:left}
+    th{background:#f1f5f9}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Job-Verwaltung</h1>
+    {% if jobs and jobs.items %}
+      <table>
+        <thead><tr><th>Titel</th><th>Ort</th><th>Aktiv</th></tr></thead>
+        <tbody>
+          {% for j in jobs.items %}
+            <tr>
+              <td>{{ j.title }}</td>
+              <td>{{ j.location }}</td>
+              <td>{{ 'Ja' if j.is_active else 'Nein' }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p>Keine Jobs gefunden.</p>
+    {% endif %}
+  </div>
+</body>
+</html>
+
+

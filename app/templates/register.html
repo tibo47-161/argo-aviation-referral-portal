@@ -203,8 +203,6 @@
         {% endwith %}
         
         <form method="POST">
-            <!-- CSRF Token hinzugefügt -->
-            {{ csrf_token() }}
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
             
             <label for="first_name">Vorname:</label>

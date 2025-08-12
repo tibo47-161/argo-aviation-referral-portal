@@ -80,13 +80,94 @@ def jobs():
     """Stellenausschreibungen anzeigen"""
     try:
         page = request.args.get('page', 1, type=int)
-        jobs = JobListing.query.filter_by(is_active=True).paginate(
+        search = request.args.get('search', '')
+        location = request.args.get('location', '')
+        
+        query = JobListing.query.filter_by(is_active=True)
+        
+        if search:
+            query = query.filter(JobListing.title.ilike(f'%{search}%'))
+        if location:
+            query = query.filter(JobListing.location.ilike(f'%{location}%'))
+            
+        jobs = query.order_by(JobListing.posting_date.desc()).paginate(
             page=page, per_page=10, error_out=False
         )
-        return render_template('jobs.html', jobs=jobs)
+        return render_template('jobs.html', jobs=jobs, search=search, location=location)
     except Exception as e:
         flash('Fehler beim Laden der Stellenausschreibungen.', 'danger')
-        return render_template('jobs.html', jobs=None)
+        return render_template('jobs.html', jobs=None, search='', location='')
+
+@main_bp.route('/jobs/<job_id>')
+@login_required
+def job_detail(job_id):
+    """Job-Details anzeigen"""
+    try:
+        job = JobListing.query.get_or_404(job_id)
+        if not job.is_active:
+            flash('Diese Stellenausschreibung ist nicht mehr aktiv.', 'warning')
+            return redirect(url_for('main.jobs'))
+        return render_template('job_detail.html', job=job)
+    except Exception as e:
+        flash('Fehler beim Laden der Job-Details.', 'danger')
+        return redirect(url_for('main.jobs'))
+
+@main_bp.route('/jobs/<job_id>/submit-referral', methods=['GET', 'POST'])
+@login_required
+def submit_referral(job_id):
+    """Referral für einen Job einreichen"""
+    try:
+        job = JobListing.query.get_or_404(job_id)
+        if not job.is_active:
+            flash('Diese Stellenausschreibung ist nicht mehr aktiv.', 'warning')
+            return redirect(url_for('main.jobs'))
+        
+        if request.method == 'POST':
+            form_data = {
+                'applicant_name': request.form.get('applicant_name', '').strip(),
+                'applicant_email': request.form.get('applicant_email', '').strip(),
+                'applicant_phone': request.form.get('applicant_phone', '').strip(),
+                'cover_letter': request.form.get('cover_letter', '').strip(),
+                'notes': request.form.get('notes', '').strip(),
+            }
+            
+            # Validierung
+            if not form_data['applicant_name'] or not form_data['applicant_email']:
+                flash('Name und E-Mail des Bewerbers sind erforderlich.', 'error')
+                return render_template('submit_referral.html', job=job, form_data=form_data)
+            
+            # Datei-Upload verarbeiten
+            resume_file = request.files.get('resume')
+            if not resume_file or resume_file.filename == '':
+                flash('Bitte laden Sie einen Lebenslauf hoch.', 'error')
+                return render_template('submit_referral.html', job=job, form_data=form_data)
+            
+            # Hier würde normalerweise die Datei-Validierung und -Speicherung erfolgen
+            # Für MVP speichern wir nur die Metadaten
+            
+            # Referral erstellen
+            referral = Referral(
+                referrer_id=current_user.user_id,
+                job_id=job.job_id,
+                applicant_name=form_data['applicant_name'],
+                applicant_email=form_data['applicant_email'],
+                applicant_phone=form_data['applicant_phone'] or None,
+                cover_letter=form_data['cover_letter'] or None,
+                notes=form_data['notes'] or None,
+                status='submitted'
+            )
+            
+            db.session.add(referral)
+            db.session.commit()
+            
+            flash('Referral erfolgreich eingereicht!', 'success')
+            return redirect(url_for('main.my_referrals'))
+        
+        return render_template('submit_referral.html', job=job, form_data=None)
+        
+    except Exception as e:
+        flash('Fehler beim Einreichen des Referrals.', 'danger')
+        return redirect(url_for('main.job_detail', job_id=job_id))
 
 @main_bp.route('/my-referrals')
 @login_required

@@ -1,5 +1,5 @@
 ﻿# app/__init__.py - KORRIGIERTE VERSION
-from flask import Flask
+from flask import Flask, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
@@ -74,9 +74,11 @@ def create_app(config_class=Config):
     # Blueprint Registration
     from app.auth import auth_bp
     from app.main import main_bp
+    from app.api import api_bp
     
     app.register_blueprint(auth_bp, url_prefix='/auth')
     app.register_blueprint(main_bp)
+    app.register_blueprint(api_bp, url_prefix='/api')
 
     # KORREKTUR 6: CORS für API-Zugriff (falls benötigt)
     @app.after_request

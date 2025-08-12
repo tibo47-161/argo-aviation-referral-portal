@@ -21,12 +21,12 @@ def client(app):
 
 def test_register_page(client):
     """Test dass die Registrierungsseite lädt"""
-    response = client.get('/register')
+    response = client.get('/auth/register')
     assert response.status_code == 200
     assert b'Registrieren' in response.data
 
 def test_login_page(client):
     """Test dass die Login-Seite lädt"""
-    response = client.get('/login')
+    response = client.get('/auth/login')
     assert response.status_code == 200
     assert b'Login' in response.data
