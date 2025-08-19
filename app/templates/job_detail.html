@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ job.title }} - Stellenausschreibung</title>
+  <style>
+    body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;margin:0;padding:0;background:#f8fafc}
+    .container{max-width:900px;margin:2rem auto;padding:0 1rem}
+    .card{background:#fff;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.08);padding:1.5rem;margin-bottom:1rem}
+    .header{display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;flex-wrap:wrap}
+    .title{font-size:1.8rem;font-weight:600;margin:0 0 .5rem}
+    .location{color:#666;margin-bottom:1rem}
+    .badge{display:inline-block;padding:.3rem .6rem;border-radius:6px;font-size:.8rem;font-weight:500}
+    .badge-primary{background:#e3f2fd;color:#1976d2}
+    .badge-success{background:#e8f5e8;color:#2e7d32}
+    .btn{display:inline-block;padding:.7rem 1.2rem;border-radius:8px;text-decoration:none;font-weight:500;border:none;cursor:pointer;transition:all .2s}
+    .btn-primary{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff}
+    .btn-primary:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(102,126,234,.4)}
+    .section{margin-bottom:1.5rem}
+    .section h3{margin:0 0 .5rem;color:#333}
+    .section p{color:#555;line-height:1.6;margin:0}
+    .meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-bottom:1.5rem}
+    .meta-item{display:flex;flex-direction:column}
+    .meta-label{font-size:.8rem;color:#666;text-transform:uppercase;letter-spacing:.5px}
+    .meta-value{font-weight:500;color:#333}
+    @media(max-width:768px){.header{flex-direction:column;align-items:stretch}}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <div class="header">
+        <div>
+          <h1 class="title">{{ job.title }}</h1>
+          <div class="location">{{ job.location }}</div>
+          <div>
+            <span class="badge badge-primary">{{ job.employment_type }}</span>
+            {% if job.referral_bonus %}
+              <span class="badge badge-success">Bonus: €{{ "%.0f"|format(job.referral_bonus) }}</span>
+            {% endif %}
+          </div>
+        </div>
+        <a href="{{ url_for('main.submit_referral', job_id=job.job_id) }}" class="btn btn-primary">
+          Referral einreichen
+        </a>
+      </div>
+      
+      <div class="meta">
+        <div class="meta-item">
+          <span class="meta-label">Veröffentlicht</span>
+          <span class="meta-value">{{ job.posting_date.strftime('%d.%m.%Y') if job.posting_date else 'N/A' }}</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Ablaufdatum</span>
+          <span class="meta-value">{{ job.expiry_date.strftime('%d.%m.%Y') if job.expiry_date else 'Offen' }}</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Status</span>
+          <span class="meta-value">{{ 'Aktiv' if job.is_active else 'Inaktiv' }}</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="card">
+      <div class="section">
+        <h3>Beschreibung</h3>
+        <p>{{ job.description or 'Keine Beschreibung verfügbar.' }}</p>
+      </div>
+      
+      {% if job.requirements %}
+      <div class="section">
+        <h3>Anforderungen</h3>
+        <p>{{ job.requirements }}</p>
+      </div>
+      {% endif %}
+    </div>
+    
+    <div class="card">
+      <a href="{{ url_for('main.jobs') }}" class="btn btn-primary">← Zurück zu allen Jobs</a>
+    </div>
+  </div>
+</body>
+</html>

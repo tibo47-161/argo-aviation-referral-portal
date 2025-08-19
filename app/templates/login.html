@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Argo Aviation Referral Portal</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .login-container { 
+            background: rgba(255, 255, 255, 0.95); 
+            padding: 2.5rem; 
+            border-radius: 15px; 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1); 
+            max-width: 450px; 
+            width: 90%;
+            backdrop-filter: blur(10px);
+        }
+        .logo-section {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .logo {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+        .tagline {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 0;
+        }
+        h1 { 
+            text-align: center; 
+            color: #333; 
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+        .welcome-text {
+            text-align: center;
+            color: #666;
+            margin-bottom: 2rem;
+            line-height: 1.5;
+        }
+        label { 
+            display: block; 
+            margin-bottom: 0.5rem; 
+            color: #555; 
+            font-weight: 500;
+        }
+        input[type="email"], input[type="password"], input[type="hidden"] {
+            width: calc(100% - 24px); 
+            padding: 12px; 
+            margin-bottom: 1.5rem; 
+            border: 2px solid #e1e5e9; 
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        input[type="hidden"] {
+            display: none;
+        }
+        input[type="email"]:focus, input[type="password"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        button {
+            width: 100%; 
+            padding: 12px; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        button:hover { 
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        .flash-message { 
+            padding: 12px; 
+            margin-bottom: 1.5rem; 
+            border-radius: 8px; 
+            text-align: center;
+            font-weight: 500;
+        }
+        .flash-message.danger { 
+            background-color: #fee; 
+            color: #c53030; 
+            border: 1px solid #feb2b2; 
+        }
+        .flash-message.success { 
+            background-color: #f0fff4; 
+            color: #22543d; 
+            border: 1px solid #9ae6b4; 
+        }
+        .flash-message.info { 
+            background-color: #ebf8ff; 
+            color: #2a69ac; 
+            border: 1px solid #90cdf4; 
+        }
+        .register-link {
+            text-align: center; 
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #e2e8f0;
+        }
+        .register-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+        .register-link a:hover {
+            color: #764ba2;
+            text-decoration: underline;
+        }
+        .superadmin-info {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+            border: 1px solid #ff6b6b;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        .superadmin-info h3 {
+            margin: 0 0 0.5rem 0;
+            color: #c0392b;
+            font-size: 1rem;
+        }
+        .superadmin-info p {
+            margin: 0;
+            color: #8b0000;
+            font-size: 0.9rem;
+        }
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 2rem 1.5rem;
+                margin: 1rem;
+            }
+            h1 {
+                font-size: 1.5rem;
+            }
+            .logo {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo-section">
+            <div class="logo">🛩️ Argo Aviation</div>
+            <p class="tagline">Referral Portal</p>
+        </div>
+        
+        <h1>Willkommen zurück</h1>
+        
+        <div class="welcome-text">
+            <p>Melden Sie sich an, um auf Ihr Referral-Dashboard zuzugreifen und neue Karrieremöglichkeiten zu entdecken.</p>
+        </div>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-message {{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <form method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            
+            <label for="email">E-Mail-Adresse:</label>
+            <input type="email" id="email" name="email" required placeholder="ihre.email@beispiel.de">
+
+            <label for="password">Passwort:</label>
+            <input type="password" id="password" name="password" required placeholder="Ihr Passwort">
+
+            <button type="submit">Anmelden</button>
+        </form>
+        
+        <div class="register-link">
+            <p><a href="{{ url_for('auth.register') }}">Noch kein Konto? Jetzt registrieren</a></p>
+        </div>
+        
+        <!-- Superadmin Info -->
+        <div class="superadmin-info">
+            <h3>🔥 Superadmin-Zugang</h3>
+            <p><strong>Zuerst registrieren:</strong> tobi196183@gmail.com<br>
+            <small>Wählen Sie ein sicheres Passwort bei der Registrierung</small></p>
+        </div>
+    </div>
+</body>
+</html>

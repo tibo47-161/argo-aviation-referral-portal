@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard</title>
+  <style>
+    body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;margin:0;padding:0;background:#f8fafc}
+    .container{max-width:1100px;margin:2rem auto;padding:0 1rem}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1rem}
+    .card{background:#fff;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.08);padding:1rem}
+    .num{font-size:2rem;font-weight:700}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Superadmin Übersicht</h1>
+    {% if stats %}
+      <div class="grid">
+        <div class="card"><div class="num">{{ stats.total_users }}</div><div>Benutzer</div></div>
+        <div class="card"><div class="num">{{ stats.active_users }}</div><div>Aktive Benutzer</div></div>
+        <div class="card"><div class="num">{{ stats.total_jobs }}</div><div>Jobs</div></div>
+        <div class="card"><div class="num">{{ stats.total_referrals }}</div><div>Referrals</div></div>
+      </div>
+    {% else %}
+      <p>Keine Statistiken verfügbar.</p>
+    {% endif %}
+  </div>
+</body>
+</html>
+
+

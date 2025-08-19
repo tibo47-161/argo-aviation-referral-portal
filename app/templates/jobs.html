@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stellenausschreibungen</title>
+  <style>
+    body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;margin:0;padding:0;background:#f8fafc}
+    .container{max-width:1100px;margin:2rem auto;padding:0 1rem}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem}
+    .card{background:#fff;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.08);padding:1rem}
+    .title{font-weight:600;margin:0 0 .25rem}
+    .muted{color:#666}
+    .btn{display:inline-block;margin-top:.75rem;padding:.5rem .9rem;border-radius:8px;color:#fff;text-decoration:none;background:linear-gradient(135deg,#667eea,#764ba2)}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Stellenausschreibungen</h1>
+    
+    <!-- Suchformular -->
+    <div class="card" style="margin-bottom: 1.5rem;">
+      <form method="GET" action="{{ url_for('main.jobs') }}" style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 1rem; align-items: end;">
+        <div>
+          <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Stellentitel</label>
+          <input type="text" name="search" value="{{ search }}" placeholder="z.B. Pilot, Mechaniker..." 
+                 style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 6px;">
+        </div>
+        <div>
+          <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Standort</label>
+          <input type="text" name="location" value="{{ location }}" placeholder="z.B. Hamburg, München..." 
+                 style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 6px;">
+        </div>
+        <div>
+          <button type="submit" style="padding: 0.5rem 1rem; background: linear-gradient(135deg,#667eea,#764ba2); color: white; border: none; border-radius: 6px; cursor: pointer;">
+            Suchen
+          </button>
+        </div>
+      </form>
+    </div>
+    
+    {% if jobs and jobs.items %}
+      <div class="grid">
+        {% for job in jobs.items %}
+          <div class="card">
+            <p class="title">{{ job.title }}</p>
+            <p class="muted">{{ job.location }}{% if job.referral_bonus %} • Bonus: {{ job.referral_bonus }}€{% endif %}</p>
+            <p class="muted">{{ (job.description or '')[:120] }}{% if job.description and job.description|length>120 %}…{% endif %}</p>
+            <a href="{{ url_for('main.job_detail', job_id=job.job_id) }}" class="btn">Details</a>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p>Keine aktiven Stellen verfügbar.</p>
+    {% endif %}
+  </div>
+</body>
+</html>
+
+

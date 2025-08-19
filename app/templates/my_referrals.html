@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Meine Referrals</title>
+  <style>
+    body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;margin:0;padding:0;background:#f8fafc}
+    .container{max-width:1100px;margin:2rem auto;padding:0 1rem}
+    .list{display:grid;gap:1rem}
+    .card{background:#fff;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.08);padding:1rem}
+    .row{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+    .muted{color:#666}
+    .btn{display:inline-block;padding:.5rem .9rem;border-radius:8px;color:#fff;text-decoration:none;background:linear-gradient(135deg,#667eea,#764ba2)}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Meine Referrals</h1>
+    {% if referrals and referrals.items %}
+      <div class="list">
+        {% for r in referrals.items %}
+          <div class="card">
+            <div class="row">
+              <div>
+                <strong>{{ r.applicant_name }}</strong><br/>
+                <span class="muted">{{ r.applicant_email }}</span><br/>
+                <span class="muted">{{ r.job_listing.title if r.job_listing else 'Unbekannter Job' }}</span>
+              </div>
+              <div style="text-align: right;">
+                <span class="badge" style="padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 0.8rem; 
+                     background: {% if r.status == 'submitted' %}#e3f2fd;color:#1976d2
+                                {% elif r.status == 'reviewed' %}#fff3e0;color:#f57c00
+                                {% elif r.status == 'interviewed' %}#e8f5e8;color:#2e7d32
+                                {% elif r.status == 'hired' %}#e8f5e8;color:#2e7d32
+                                {% else %}#f3e5f5;color:#7b1fa2{% endif %};">
+                  {{ r.status|title }}
+                </span><br/>
+                <span class="muted">{{ r.referral_date.strftime('%d.%m.%Y') if r.referral_date else 'N/A' }}</span>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+      
+      <!-- Pagination -->
+      {% if referrals.pages > 1 %}
+        <div style="text-align: center; margin-top: 2rem;">
+          {% if referrals.has_prev %}
+            <a href="{{ url_for('main.my_referrals', page=referrals.prev_num) }}" class="btn" style="margin-right: 0.5rem;">← Vorherige</a>
+          {% endif %}
+          <span style="margin: 0 1rem;">Seite {{ referrals.page }} von {{ referrals.pages }}</span>
+          {% if referrals.has_next %}
+            <a href="{{ url_for('main.my_referrals', page=referrals.next_num) }}" class="btn" style="margin-left: 0.5rem;">Nächste →</a>
+          {% endif %}
+        </div>
+      {% endif %}
+    {% else %}
+      <p>Sie haben noch keine Referrals eingereicht.</p>
+    {% endif %}
+    {% else %}
+      <p>Sie haben noch keine Referrals eingereicht.</p>
+    {% endif %}
+  </div>
+</body>
+</html>
+
+

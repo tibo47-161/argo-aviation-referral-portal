@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Argo Aviation Referral Portal</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .superadmin-badge {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 5px rgba(238, 90, 36, 0.3);
+        }
+        .container { 
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+        .welcome-card {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        .welcome-card h1 {
+            color: #333;
+            margin-bottom: 0.5rem;
+            font-size: 2.5rem;
+        }
+        .welcome-card p {
+            color: #666;
+            font-size: 1.1rem;
+            margin-bottom: 0;
+        }
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        .dashboard-card {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 1.5rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        .card-icon {
+            font-size: 2rem;
+            margin-right: 1rem;
+        }
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #333;
+            margin: 0;
+        }
+        .card-content {
+            color: #666;
+            line-height: 1.6;
+        }
+        .superadmin-section {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+            border: 2px solid #ff6b6b;
+        }
+        .superadmin-section .card-title {
+            color: #c0392b;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        .btn-danger {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            color: white;
+        }
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+        }
+        .btn-success {
+            background: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%);
+            color: white;
+        }
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(86, 171, 47, 0.4);
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        .stat-item {
+            text-align: center;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 10px;
+        }
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #333;
+        }
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+            .container {
+                padding: 0 1rem;
+            }
+            .welcome-card h1 {
+                font-size: 2rem;
+            }
+            .action-buttons {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">🛩️ Argo Aviation Referral Portal</div>
+        <div class="user-info">
+            {% if is_current_user_superadmin() %}
+                <span class="superadmin-badge">🔥 Superadmin</span>
+            {% endif %}
+            <span>{{ user.first_name }} {{ user.last_name }}</span>
+            <a href="{{ url_for('auth.logout') }}" class="btn btn-danger">Abmelden</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="welcome-card">
+            <h1>
+                Willkommen zurück, {{ user.first_name }}! 
+                {% if is_current_user_superadmin() %}🚀{% endif %}
+            </h1>
+            <p>
+                {% if is_current_user_superadmin() %}
+                    Sie haben Superadmin-Zugriff auf alle Funktionen des Argo Aviation Referral Portals.
+                {% else %}
+                    Verwalten Sie Ihre Referrals und entdecken Sie neue Karrieremöglichkeiten.
+                {% endif %}
+            </p>
+        </div>
+
+        <div class="dashboard-grid">
+            <!-- Allgemeine Funktionen -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <div class="card-icon">💼</div>
+                    <h3 class="card-title">Stellenausschreibungen</h3>
+                </div>
+                <div class="card-content">
+                    <p>Durchsuchen Sie aktuelle Stellenausschreibungen und finden Sie passende Kandidaten für Referrals.</p>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-number">12</div>
+                            <div class="stat-label">Aktive Stellen</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">3</div>
+                            <div class="stat-label">Neue heute</div>
+                        </div>
+                    </div>
+                    <div class="action-buttons">
+                        <a href="{{ url_for('main.jobs') }}" class="btn btn-primary">Stellen durchsuchen</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Referral Management -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <div class="card-icon">🤝</div>
+                    <h3 class="card-title">Meine Referrals</h3>
+                </div>
+                <div class="card-content">
+                    <p>Verwalten Sie Ihre eingereichten Referrals und verfolgen Sie deren Status.</p>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-number">5</div>
+                            <div class="stat-label">Aktive Referrals</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">2</div>
+                            <div class="stat-label">Erfolgreich</div>
+                        </div>
+                    </div>
+                    <div class="action-buttons">
+                        <a href="{{ url_for('main.my_referrals') }}" class="btn btn-primary">Referrals verwalten</a>
+                        <a href="{{ url_for('main.jobs') }}" class="btn btn-success">Neues Referral</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Superadmin Bereich -->
+            {% if is_current_user_superadmin() %}
+            <div class="dashboard-card superadmin-section">
+                <div class="card-header">
+                    <div class="card-icon">⚡</div>
+                    <h3 class="card-title">Superadmin-Bereich</h3>
+                </div>
+                <div class="card-content">
+                    <p><strong>Erweiterte Administratorfunktionen:</strong></p>
+                    <ul style="text-align: left; margin: 1rem 0;">
+                        <li>Benutzerverwaltung und Berechtigungen</li>
+                        <li>Stellenausschreibungen erstellen/bearbeiten</li>
+                        <li>System-Analytics und Berichte</li>
+                        <li>Datenbankmanagement</li>
+                        <li>Zoho ATS Integration</li>
+                    </ul>
+                    <div class="action-buttons">
+                        <a href="{{ url_for('main.admin_dashboard') }}" class="btn btn-danger">Admin Panel</a>
+                        <a href="{{ url_for('main.admin_users') }}" class="btn btn-primary">Benutzer verwalten</a>
+                        <a href="{{ url_for('main.admin_jobs') }}" class="btn btn-success">Jobs verwalten</a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Profil & Einstellungen -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <div class="card-icon">⚙️</div>
+                    <h3 class="card-title">Profil & Einstellungen</h3>
+                </div>
+                <div class="card-content">
+                    <p>Verwalten Sie Ihre Kontoinformationen und Benachrichtigungseinstellungen.</p>
+                    <div class="action-buttons">
+                        <a href="{{ url_for('main.profile') }}" class="btn btn-primary">Profil bearbeiten</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Schnellzugriff -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <div class="card-icon">🚀</div>
+                <h3 class="card-title">Schnellzugriff</h3>
+            </div>
+            <div class="card-content">
+                <div class="action-buttons">
+                    <a href="{{ url_for('main.jobs') }}" class="btn btn-success">Neues Referral erstellen</a>
+                    <a href="{{ url_for('main.jobs') }}" class="btn btn-primary">Stellensuche</a>
+                    <a href="{{ url_for('main.my_referrals') }}" class="btn btn-primary">Meine Statistiken</a>
+                    {% if is_current_user_superadmin() %}
+                        <a href="{{ url_for('main.admin_dashboard') }}" class="btn btn-danger">Admin Dashboard</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
