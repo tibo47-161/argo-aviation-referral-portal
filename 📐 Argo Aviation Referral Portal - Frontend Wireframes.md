@@ -416,12 +416,22 @@ Diese Wireframes definieren die komplette Benutzeroberfläche für das Argo Avia
 ## 🎨 **Design-System Spezifikationen**
 
 ### **Farbpalette:**
-- **Primary:** #f6bb41; (Yellow Gradient), gray: #333333; (Dark Gray)
-- **Secondary:** #ECC94B; (Yellow), cyan-bluish-gray: #abb8c3; (Light Gray)
-- **Success:** #56ab2f (Green)
-- **Warning:** #ff9a9e (Pink)
-- **Danger:** #ff6b6b (Red)
-- **Background:** #f8fafc (Light Gray)
+color--primary: #f6bb41;
+color--secondary: #ECC94B;
+black: #000000;
+cyan-bluish-gray: #abb8c3;
+white: #ffffff;
+pale-pink: #f78da7;
+vivid-red: #cf2e2e;
+luminous-vivid-orange: #ff6900;
+luminous-vivid-amber: #fcb900;
+light-green-cyan: #7bdcb5;
+vivid-green-cyan: #00d084;
+pale-cyan-blue: #8ed1fc;
+vivid-cyan-blue: #0693e3;
+vivid-purple: #9b51e0;
+gray: #333333;
+gray-light: #f6f6f6;
 
 ### **Typografie:**
 - **Headlines:** Segoe UI, 24-36px, Bold
