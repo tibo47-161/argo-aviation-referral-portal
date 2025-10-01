@@ -120,7 +120,7 @@ def login():
 @login_required # Stellt sicher, dass nur angemeldete Benutzer diese Route aufrufen können
 def logout():
     logout_user() # Meldet den aktuellen Benutzer von der Session ab
-    flash('Sie wurden abgemeldet.', 'info')
+    flash("Sie wurden erfolgreich abgemeldet", "success")
     return redirect(url_for('auth.login')) # Leite zur Login-Seite um nach dem Abmelden
 
 # Hilfsfunktion für Templates

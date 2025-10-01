@@ -1,71 +1,42 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{% block title %}Argo Aviation Referral Portal{% endblock %}</title>
-  <style>
-    body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;margin:0;padding:0;background:#f8fafc}
-    .header{background:rgba(255,255,255,.95);padding:1rem 2rem;box-shadow:0 2px 10px rgba(0,0,0,.1);display:flex;justify-content:space-between;align-items:center}
-    .logo{font-size:1.5rem;font-weight:bold;color:#333}
-    .nav{display:flex;gap:1rem;align-items:center}
-    .nav a{text-decoration:none;color:#333;padding:.5rem 1rem;border-radius:6px;transition:background .2s}
-    .nav a:hover{background:#f1f5f9}
-    .nav a.active{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff}
-    .user-info{display:flex;align-items:center;gap:1rem}
-    .superadmin-badge{background:linear-gradient(45deg,#ff6b6b,#ee5a24);color:white;padding:.3rem .8rem;border-radius:20px;font-size:.8rem;font-weight:bold;text-transform:uppercase;letter-spacing:.5px}
-    .container{max-width:1200px;margin:2rem auto;padding:0 2rem}
-    .btn{display:inline-block;padding:.7rem 1.2rem;border-radius:8px;text-decoration:none;font-weight:500;border:none;cursor:pointer;transition:all .2s}
-    .btn-primary{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff}
-    .btn-primary:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(102,126,234,.4)}
-    .btn-danger{background:linear-gradient(135deg,#ff6b6b,#ee5a24);color:#fff}
-    .btn-danger:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(255,107,107,.4)}
-    .card{background:#fff;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.08);padding:1.5rem;margin-bottom:1rem}
-    .alert{padding:1rem;border-radius:8px;margin-bottom:1rem}
-    .alert-success{background:#d4edda;color:#155724;border:1px solid #c3e6cb}
-    .alert-danger{background:#f8d7da;color:#721c24;border:1px solid #f5c6cb}
-    .alert-warning{background:#fff3cd;color:#856404;border:1px solid #ffeaa7}
-    @media(max-width:768px){.header{flex-direction:column;gap:1rem;text-align:center}.nav{flex-wrap:wrap;justify-content:center}}
-  </style>
-  {% block extra_css %}{% endblock %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Argo Aviation Referral Portal{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for("static", filename="css/argo-style.css") }}">
 </head>
 <body>
-  {% if current_user.is_authenticated %}
-  <div class="header">
-    <div class="logo">🛩️ Argo Aviation Referral Portal</div>
-    <nav class="nav">
-      <a href="{{ url_for('main.dashboard') }}" class="{{ 'active' if request.endpoint == 'main.dashboard' else '' }}">Dashboard</a>
-      <a href="{{ url_for('main.jobs') }}" class="{{ 'active' if request.endpoint == 'main.jobs' else '' }}">Stellen</a>
-      <a href="{{ url_for('main.my_referrals') }}" class="{{ 'active' if request.endpoint == 'main.my_referrals' else '' }}">Meine Referrals</a>
-      <a href="{{ url_for('main.profile') }}" class="{{ 'active' if request.endpoint == 'main.profile' else '' }}">Profil</a>
-      {% if is_superadmin %}
-        <a href="{{ url_for('main.admin_dashboard') }}" class="{{ 'active' if request.endpoint == 'main.admin_dashboard' else '' }}">Admin</a>
-      {% endif %}
-    </nav>
-    <div class="user-info">
-      {% if is_superadmin %}
-        <span class="superadmin-badge">🔥 Superadmin</span>
-      {% endif %}
-      <span>{{ current_user.first_name }} {{ current_user.last_name }}</span>
-      <a href="{{ url_for('auth.logout') }}" class="btn btn-danger">Abmelden</a>
-    </div>
-  </div>
-  {% endif %}
-
-  <div class="container">
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        {% for category, message in messages %}
-          <div class="alert alert-{{ 'danger' if category == 'error' else category }}">
-            {{ message }}
-          </div>
-        {% endfor %}
-      {% endif %}
-    {% endwith %}
-
-    {% block content %}{% endblock %}
-  </div>
-
-  {% block extra_js %}{% endblock %}
+    <header>
+        <nav>
+            <a href="{{ url_for("main.index") }}" class="logo">Argo Aviation</a>
+            <ul>
+                {% if current_user.is_authenticated %}
+                    <li><a href="{{ url_for("main.dashboard") }}">Dashboard</a></li>
+                    <li><a href="{{ url_for("main.jobs") }}">Jobs</a></li>
+                    <li><a href="{{ url_for("main.my_referrals") }}">Meine Referrals</a></li>
+                    <li><a href="{{ url_for("auth.logout") }}">Abmelden</a></li>
+                {% else %}
+                    <li><a href="{{ url_for("auth.login") }}">Anmelden</a></li>
+                    <li><a href="{{ url_for("auth.register") }}">Registrieren</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    </header>
+    <main>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="flash {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+    </main>
+    <footer>
+        <p>&copy; 2025 Argo Aviation GmbH</p>
+    </footer>
 </body>
 </html>
