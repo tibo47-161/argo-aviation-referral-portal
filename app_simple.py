@@ -125,7 +125,9 @@ BASE_TEMPLATE = '''
                 {% endif %}
             {% endwith %}
             
-            {% block content %}{% endblock %}
+            <div class="content">
+                {CONTENT}
+            </div>
         </div>
     </main>
 
@@ -144,8 +146,7 @@ def index():
     if 'user_id' in session:
         return redirect(url_for('dashboard'))
     
-    template = BASE_TEMPLATE + '''
-    {% block content %}
+    content = '''
     <div class="card" style="text-align: center; max-width: 600px; margin: 0 auto;">
         <h1 style="color: #1e3a8a; margin-bottom: 1rem;">Willkommen bei Argo Aviation</h1>
         <p style="font-size: 1.1rem; margin-bottom: 2rem; color: #64748b;">
@@ -156,8 +157,8 @@ def index():
             <a href="{{ url_for('register') }}" class="btn btn-secondary">Registrieren</a>
         </div>
     </div>
-    {% endblock %}
     '''
+    template = BASE_TEMPLATE.replace('{CONTENT}', content)
     return render_template_string(template)
 
 @app.route('/login', methods=['GET', 'POST'])
