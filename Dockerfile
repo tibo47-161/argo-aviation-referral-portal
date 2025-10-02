@@ -14,8 +14,8 @@ ENV PORT=8000
 COPY requirements_azure.txt requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy application files
-COPY app_working.py .
+# Copy application files - FIXED: Copy main.py instead of app_working.py
+COPY main.py .
 
 # Create necessary directories
 RUN mkdir -p instance logs uploads
@@ -31,5 +31,5 @@ HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
 # Expose port
 EXPOSE 8000
 
-# Start command
-CMD ["python", "app_working.py"]
+# Start command - FIXED: Start main.py
+CMD ["python", "main.py"]
