@@ -500,7 +500,8 @@ def init_db():
 
 if __name__ == '__main__':
     init_db()
-    port = int(os.environ.get('PORT', 5001))
+    # Azure App Service verwendet Port 8000
+    port = int(os.environ.get('PORT', 8000))
     app.run(host='0.0.0.0', port=port, debug=False)
 else:
     # Für Azure App Service
