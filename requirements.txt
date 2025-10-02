@@ -22,7 +22,7 @@ bleach==6.0.0
 
 # File Handling
 Pillow==10.0.1
-python-magic-bin==0.4.14
+# python-magic-bin==0.4.14  # Removed: Not available in Azure App Service
 
 # Environment & Configuration
 python-dotenv==1.0.0
