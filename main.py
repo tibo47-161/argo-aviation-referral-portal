@@ -1,9 +1,9 @@
 """
-Argo Aviation Referral Portal - Final Version with Correct Colors
-A Flask application for the aviation referral system with proper Argo branding
+Argo Aviation Referral Portal - FIXED VERSION
+Completely working version with proper URL routing and Argo colors
 """
 
-from flask import Flask, render_template_string, request, redirect, url_for, session, flash
+from flask import Flask, request, redirect, url_for, session, flash, render_template_string
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
@@ -32,7 +32,6 @@ class Job(db.Model):
     location = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text, nullable=False)
     requirements = db.Column(db.Text, nullable=False)
-    salary_range = db.Column(db.String(100))
     bonus_amount = db.Column(db.Float, default=1000.0)
     is_active = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -48,8 +47,8 @@ class Referral(db.Model):
     status = db.Column(db.String(50), default='pending')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-# HTML Template with Correct Argo Aviation Colors
-HTML_TEMPLATE = '''
+# HTML Template with Argo Colors
+BASE_TEMPLATE = '''
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -94,7 +93,6 @@ HTML_TEMPLATE = '''
         .nav a:hover, .nav a.active { 
             background: #4A4A4A; 
             color: #F4D03F; 
-            transform: translateY(-1px);
         }
         .main { padding: 2rem 0; min-height: calc(100vh - 200px); }
         .card { 
@@ -118,6 +116,7 @@ HTML_TEMPLATE = '''
             font-weight: 600;
             transition: all 0.3s ease; 
             box-shadow: 0 2px 10px rgba(218,165,32,0.3);
+            margin: 5px;
         }
         .btn:hover { 
             background: linear-gradient(135deg, #B8860B, #DAA520); 
@@ -163,17 +162,56 @@ HTML_TEMPLATE = '''
             border: 2px solid #4ade80; 
             color: #166534; 
         }
-        .alert-error { 
-            background: #fef2f2; 
-            border: 2px solid #ef4444; 
-            color: #dc2626; 
-        }
         .footer { 
             background: #2F2F2F; 
             color: #DAA520; 
             text-align: center; 
             padding: 2rem 0; 
             border-top: 3px solid #DAA520;
+        }
+        .welcome-section {
+            background: linear-gradient(135deg, #DAA520 0%, #B8860B 100%);
+            color: #2F2F2F;
+            padding: 4rem 0;
+            text-align: center;
+            margin-bottom: 3rem;
+            border-radius: 12px;
+        }
+        .welcome-section h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        .welcome-section p {
+            font-size: 1.2rem;
+            font-weight: 500;
+            margin-bottom: 2rem;
+        }
+        .stats { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
+            gap: 2rem; 
+            margin-bottom: 3rem; 
+        }
+        .stat-card { 
+            background: white; 
+            padding: 2rem; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1); 
+            text-align: center; 
+            border-left: 4px solid #DAA520;
+        }
+        .stat-number { 
+            font-size: 3rem; 
+            font-weight: 900; 
+            color: #DAA520; 
+        }
+        .stat-label { 
+            color: #2F2F2F; 
+            margin-top: 10px; 
+            font-weight: 600;
+            font-size: 1.1rem;
         }
         .job-grid { 
             display: grid; 
@@ -212,55 +250,6 @@ HTML_TEMPLATE = '''
             display: inline-block;
             margin: 10px 0;
         }
-        .stats { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
-            gap: 2rem; 
-            margin-bottom: 3rem; 
-        }
-        .stat-card { 
-            background: white; 
-            padding: 2rem; 
-            border-radius: 12px; 
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1); 
-            text-align: center; 
-            border-left: 4px solid #DAA520;
-            transition: transform 0.3s ease;
-        }
-        .stat-card:hover {
-            transform: translateY(-3px);
-        }
-        .stat-number { 
-            font-size: 3rem; 
-            font-weight: 900; 
-            color: #DAA520; 
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
-        }
-        .stat-label { 
-            color: #2F2F2F; 
-            margin-top: 10px; 
-            font-weight: 600;
-            font-size: 1.1rem;
-        }
-        .welcome-section {
-            background: linear-gradient(135deg, #DAA520 0%, #B8860B 100%);
-            color: #2F2F2F;
-            padding: 4rem 0;
-            text-align: center;
-            margin-bottom: 3rem;
-            border-radius: 12px;
-        }
-        .welcome-section h2 {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
-        }
-        .welcome-section p {
-            font-size: 1.2rem;
-            font-weight: 500;
-            margin-bottom: 2rem;
-        }
     </style>
 </head>
 <body>
@@ -273,10 +262,10 @@ HTML_TEMPLATE = '''
     {% if session.user_id %}
     <nav class="nav">
         <div class="container">
-            <a href="{{ url_for('dashboard') }}" {% if request.endpoint == 'dashboard' %}class="active"{% endif %}>Dashboard</a>
-            <a href="{{ url_for('jobs') }}" {% if request.endpoint == 'jobs' %}class="active"{% endif %}>Jobs</a>
-            <a href="{{ url_for('my_referrals') }}" {% if request.endpoint == 'my_referrals' %}class="active"{% endif %}>Meine Referrals</a>
-            <a href="{{ url_for('logout') }}">Abmelden</a>
+            <a href="/dashboard">Dashboard</a>
+            <a href="/jobs">Jobs</a>
+            <a href="/my_referrals">Meine Referrals</a>
+            <a href="/logout">Abmelden</a>
         </div>
     </nav>
     {% endif %}
@@ -291,7 +280,7 @@ HTML_TEMPLATE = '''
                 {% endif %}
             {% endwith %}
             
-            {{ content }}
+            {{ content|safe }}
         </div>
     </main>
 
@@ -308,17 +297,17 @@ HTML_TEMPLATE = '''
 @app.route('/')
 def index():
     if session.get('user_id'):
-        return redirect(url_for('dashboard'))
+        return redirect('/dashboard')
     
     content = '''
     <div class="welcome-section">
         <h2>Willkommen bei Argo Aviation</h2>
         <p>Ihr Partner für Luftfahrt-Recruiting und Referral-Programme</p>
-        <a href="{{ url_for('login') }}" class="btn">Anmelden</a>
-        <a href="{{ url_for('register') }}" class="btn btn-secondary">Registrieren</a>
+        <a href="/login" class="btn">Anmelden</a>
+        <a href="/register" class="btn btn-secondary">Registrieren</a>
     </div>
     '''
-    return render_template_string(HTML_TEMPLATE.replace('{{ content }}', content), title="Willkommen")
+    return render_template_string(BASE_TEMPLATE, title="Willkommen", content=content)
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -329,7 +318,7 @@ def register():
         
         if User.query.filter_by(email=email).first():
             flash('Diese E-Mail-Adresse ist bereits registriert.')
-            return redirect(url_for('register'))
+            return redirect('/register')
         
         user = User(
             name=name,
@@ -340,7 +329,7 @@ def register():
         db.session.commit()
         
         flash('Registrierung erfolgreich! Sie können sich jetzt anmelden.')
-        return redirect(url_for('login'))
+        return redirect('/login')
     
     content = '''
     <div class="card">
@@ -359,11 +348,11 @@ def register():
                 <input type="password" name="password" required>
             </div>
             <button type="submit" class="btn">Registrieren</button>
-            <a href="{{ url_for('login') }}" class="btn btn-secondary">Bereits registriert? Anmelden</a>
+            <a href="/login" class="btn btn-secondary">Bereits registriert? Anmelden</a>
         </form>
     </div>
     '''
-    return render_template_string(HTML_TEMPLATE.replace('{{ content }}', content), title="Registrieren")
+    return render_template_string(BASE_TEMPLATE, title="Registrieren", content=content)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -377,7 +366,7 @@ def login():
             session['user_name'] = user.name
             session['is_admin'] = user.is_admin
             flash('Erfolgreich angemeldet!')
-            return redirect(url_for('dashboard'))
+            return redirect('/dashboard')
         else:
             flash('Ungültige Anmeldedaten.')
     
@@ -394,16 +383,16 @@ def login():
                 <input type="password" name="password" required>
             </div>
             <button type="submit" class="btn">Anmelden</button>
-            <a href="{{ url_for('register') }}" class="btn btn-secondary">Noch kein Konto? Registrieren</a>
+            <a href="/register" class="btn btn-secondary">Noch kein Konto? Registrieren</a>
         </form>
     </div>
     '''
-    return render_template_string(HTML_TEMPLATE.replace('{{ content }}', content), title="Anmelden")
+    return render_template_string(BASE_TEMPLATE, title="Anmelden", content=content)
 
 @app.route('/dashboard')
 def dashboard():
     if not session.get('user_id'):
-        return redirect(url_for('login'))
+        return redirect('/login')
     
     total_jobs = Job.query.filter_by(is_active=True).count()
     total_referrals = Referral.query.count()
@@ -429,20 +418,20 @@ def dashboard():
     
     <div class="card">
         <h3>Schnellzugriff</h3>
-        <a href="{{ url_for('jobs') }}" class="btn">Jobs ansehen</a>
-        <a href="{{ url_for('my_referrals') }}" class="btn btn-secondary">Meine Referrals</a>
+        <a href="/jobs" class="btn">Jobs ansehen</a>
+        <a href="/my_referrals" class="btn btn-secondary">Meine Referrals</a>
     </div>
     '''
-    return render_template_string(HTML_TEMPLATE.replace('{{ content }}', content), title="Dashboard")
+    return render_template_string(BASE_TEMPLATE, title="Dashboard", content=content)
 
 @app.route('/jobs')
 def jobs():
     if not session.get('user_id'):
-        return redirect(url_for('login'))
+        return redirect('/login')
     
     jobs = Job.query.filter_by(is_active=True).all()
     
-    jobs_html = ''
+    jobs_html = '<div class="job-grid">'
     for job in jobs:
         jobs_html += f'''
         <div class="job-card">
@@ -450,22 +439,21 @@ def jobs():
             <div class="job-company">{job.company} - {job.location}</div>
             <p>{job.description[:150]}...</p>
             <div class="job-bonus">Bonus: €{job.bonus_amount:.0f}</div>
-            <a href="{{ url_for('job_detail', job_id={job.id}) }}" class="btn">Details</a>
+            <a href="/job/{job.id}" class="btn">Details ansehen</a>
         </div>
         '''
+    jobs_html += '</div>'
     
     content = f'''
     <h2>Aktuelle Stellenausschreibungen</h2>
-    <div class="job-grid">
-        {jobs_html}
-    </div>
+    {jobs_html}
     '''
-    return render_template_string(HTML_TEMPLATE.replace('{{ content }}', content), title="Jobs")
+    return render_template_string(BASE_TEMPLATE, title="Jobs", content=content)
 
 @app.route('/job/<int:job_id>')
 def job_detail(job_id):
     if not session.get('user_id'):
-        return redirect(url_for('login'))
+        return redirect('/login')
     
     job = Job.query.get_or_404(job_id)
     
@@ -480,21 +468,20 @@ def job_detail(job_id):
         <h3>Anforderungen</h3>
         <p>{job.requirements}</p>
         
-        <div class="job-bonus">
-            <strong>Referral-Bonus</strong><br>
-            €{job.bonus_amount:.0f}
+        <div style="background: linear-gradient(135deg, #DAA520, #B8860B); color: #2F2F2F; padding: 15px; border-radius: 10px; margin: 20px 0; text-align: center;">
+            <strong>Referral-Bonus: €{job.bonus_amount:.0f}</strong>
         </div>
         
-        <a href="{{ url_for('submit_referral', job_id={job.id}) }}" class="btn">Referral einreichen</a>
-        <a href="{{ url_for('jobs') }}" class="btn btn-secondary">Zurück zu Jobs</a>
+        <a href="/submit_referral/{job.id}" class="btn">Referral einreichen</a>
+        <a href="/jobs" class="btn btn-secondary">Zurück zu Jobs</a>
     </div>
     '''
-    return render_template_string(HTML_TEMPLATE.replace('{{ content }}', content), title=job.title)
+    return render_template_string(BASE_TEMPLATE, title=job.title, content=content)
 
 @app.route('/submit_referral/<int:job_id>', methods=['GET', 'POST'])
 def submit_referral(job_id):
     if not session.get('user_id'):
-        return redirect(url_for('login'))
+        return redirect('/login')
     
     job = Job.query.get_or_404(job_id)
     
@@ -511,7 +498,7 @@ def submit_referral(job_id):
         db.session.commit()
         
         flash('Referral erfolgreich eingereicht!')
-        return redirect(url_for('my_referrals'))
+        return redirect('/my_referrals')
     
     content = f'''
     <div class="card">
@@ -534,49 +521,55 @@ def submit_referral(job_id):
                 <textarea name="notes" rows="4"></textarea>
             </div>
             <button type="submit" class="btn">Referral einreichen</button>
-            <a href="{{ url_for('job_detail', job_id={job.id}) }}" class="btn btn-secondary">Zurück</a>
+            <a href="/job/{job.id}" class="btn btn-secondary">Zurück</a>
         </form>
     </div>
     '''
-    return render_template_string(HTML_TEMPLATE.replace('{{ content }}', content), title="Referral einreichen")
+    return render_template_string(BASE_TEMPLATE, title="Referral einreichen", content=content)
 
 @app.route('/my_referrals')
 def my_referrals():
     if not session.get('user_id'):
-        return redirect(url_for('login'))
+        return redirect('/login')
     
     referrals = db.session.query(Referral, Job).join(Job).filter(Referral.referrer_id == session['user_id']).all()
     
-    referrals_html = ''
-    for referral, job in referrals:
-        status_color = '#4ade80' if referral.status == 'approved' else '#f59e0b' if referral.status == 'pending' else '#ef4444'
-        referrals_html += f'''
-        <div class="job-card">
-            <div class="job-title">{job.title}</div>
-            <div class="job-company">{job.company}</div>
-            <p><strong>Kandidat:</strong> {referral.candidate_name}</p>
-            <p><strong>E-Mail:</strong> {referral.candidate_email}</p>
-            <p><strong>Status:</strong> <span style="color: {status_color}; font-weight: bold;">{referral.status}</span></p>
-            <p><strong>Eingereicht:</strong> {referral.created_at.strftime('%d.%m.%Y')}</p>
+    if not referrals:
+        content = '''
+        <h2>Meine Referrals</h2>
+        <div class="card">
+            <p>Sie haben noch keine Referrals eingereicht.</p>
+            <a href="/jobs" class="btn">Jobs ansehen</a>
         </div>
         '''
-    
-    if not referrals_html:
-        referrals_html = '<div class="card"><p>Sie haben noch keine Referrals eingereicht.</p></div>'
-    
-    content = f'''
-    <h2>Meine Referrals</h2>
-    <div class="job-grid">
+    else:
+        referrals_html = '<div class="job-grid">'
+        for referral, job in referrals:
+            status_color = '#4ade80' if referral.status == 'approved' else '#f59e0b' if referral.status == 'pending' else '#ef4444'
+            referrals_html += f'''
+            <div class="job-card">
+                <div class="job-title">{job.title}</div>
+                <div class="job-company">{job.company}</div>
+                <p><strong>Kandidat:</strong> {referral.candidate_name}</p>
+                <p><strong>E-Mail:</strong> {referral.candidate_email}</p>
+                <p><strong>Status:</strong> <span style="color: {status_color}; font-weight: bold;">{referral.status}</span></p>
+                <p><strong>Eingereicht:</strong> {referral.created_at.strftime('%d.%m.%Y')}</p>
+            </div>
+            '''
+        referrals_html += '</div>'
+        
+        content = f'''
+        <h2>Meine Referrals</h2>
         {referrals_html}
-    </div>
-    '''
-    return render_template_string(HTML_TEMPLATE.replace('{{ content }}', content), title="Meine Referrals")
+        '''
+    
+    return render_template_string(BASE_TEMPLATE, title="Meine Referrals", content=content)
 
 @app.route('/logout')
 def logout():
     session.clear()
     flash('Erfolgreich abgemeldet!')
-    return redirect(url_for('index'))
+    return redirect('/')
 
 def init_db():
     """Initialize database with sample data"""
@@ -600,24 +593,24 @@ def init_db():
                     title='Pilot (A320)',
                     company='Argo Aviation GmbH',
                     location='Frankfurt am Main',
-                    description='Wir suchen einen erfahrenen Piloten für unsere A320 Flotte. Sie werden nationale und internationale Flüge durchführen.',
-                    requirements='ATPL Lizenz, A320 Type Rating, Mindestens 3000 Flugstunden',
+                    description='Wir suchen einen erfahrenen Piloten für unsere A320 Flotte. Sie werden nationale und internationale Flüge durchführen und sind verantwortlich für die Sicherheit unserer Passagiere.',
+                    requirements='ATPL Lizenz, A320 Type Rating, Mindestens 3000 Flugstunden, Englischkenntnisse Level 4',
                     bonus_amount=2000.0
                 ),
                 Job(
                     title='Flugbegleiter/in',
                     company='Argo Aviation GmbH',
                     location='München',
-                    description='Freundliche und professionelle Flugbegleiter für unsere Kabinencrew gesucht.',
-                    requirements='Abgeschlossene Flugbegleiter-Ausbildung, Mehrsprachigkeit von Vorteil',
+                    description='Freundliche und professionelle Flugbegleiter für unsere Kabinencrew gesucht. Sie sorgen für das Wohlbefinden unserer Passagiere.',
+                    requirements='Abgeschlossene Flugbegleiter-Ausbildung, Mehrsprachigkeit von Vorteil, Teamfähigkeit',
                     bonus_amount=1000.0
                 ),
                 Job(
                     title='Flugzeugmechaniker',
                     company='Argo Aviation GmbH',
                     location='Hamburg',
-                    description='Wartung und Instandhaltung unserer Flugzeugflotte.',
-                    requirements='Abgeschlossene Ausbildung als Flugzeugmechaniker, EASA Lizenz',
+                    description='Wartung und Instandhaltung unserer Flugzeugflotte. Sie sind verantwortlich für die technische Sicherheit unserer Flugzeuge.',
+                    requirements='Abgeschlossene Ausbildung als Flugzeugmechaniker, EASA Lizenz, Erfahrung mit Airbus-Flugzeugen',
                     bonus_amount=1500.0
                 )
             ]
@@ -628,4 +621,5 @@ def init_db():
 
 if __name__ == '__main__':
     init_db()
-    app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 3000)), debug=True)
+    port = int(os.environ.get('PORT', 8002))
+    app.run(host='0.0.0.0', port=port, debug=False)
