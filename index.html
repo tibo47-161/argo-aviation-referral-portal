@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 Argo Aviation Referral Portal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3a8a 0%, #374151 100%);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 1rem 2rem;
+            border-bottom: 2px solid #3b82f6;
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #60a5fa;
+        }
+        
+        .container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        .status-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 3rem;
+            max-width: 800px;
+            width: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .status-badge {
+            display: inline-block;
+            background: #10b981;
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 50px;
+            font-weight: bold;
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+        
+        .app-title {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, #60a5fa, #34d399);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .subtitle {
+            font-size: 1.3rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        
+        .feature {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1.5rem;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .feature h3 {
+            color: #60a5fa;
+            margin-bottom: 0.5rem;
+            font-size: 1.2rem;
+        }
+        
+        .feature p {
+            opacity: 0.8;
+            line-height: 1.5;
+        }
+        
+        .demo-section {
+            margin-top: 3rem;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .demo-login {
+            background: #1e40af;
+            color: white;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            margin: 0.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .demo-login:hover {
+            background: #1d4ed8;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(30, 64, 175, 0.3);
+        }
+        
+        .info-text {
+            margin-top: 2rem;
+            padding: 1rem;
+            background: rgba(59, 130, 246, 0.1);
+            border-radius: 10px;
+            border-left: 4px solid #3b82f6;
+        }
+        
+        .deployment-status {
+            margin-top: 2rem;
+            padding: 1rem;
+            background: rgba(16, 185, 129, 0.1);
+            border-radius: 10px;
+            border-left: 4px solid #10b981;
+        }
+        
+        .tech-stack {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        .tech-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        @media (max-width: 768px) {
+            .app-title {
+                font-size: 2rem;
+            }
+            
+            .container {
+                padding: 1rem;
+            }
+            
+            .status-card {
+                padding: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>✈️ Argo Aviation GmbH</h1>
+    </div>
+    
+    <div class="container">
+        <div class="status-card">
+            <div class="status-badge">🟢 ONLINE & DEPLOYED</div>
+            
+            <h1 class="app-title">Referral Portal</h1>
+            <p class="subtitle">Professionelles Mitarbeiter-Empfehlungssystem für die Luftfahrtbranche</p>
+            
+            <div class="features">
+                <div class="feature">
+                    <h3>👤 Benutzer-Management</h3>
+                    <p>Sichere Registrierung und Anmeldung mit Rollen-basiertem Zugriff</p>
+                </div>
+                
+                <div class="feature">
+                    <h3>✈️ Job-Portal</h3>
+                    <p>Aktuelle Stellenausschreibungen in der Luftfahrtbranche mit Referral-Boni</p>
+                </div>
+                
+                <div class="feature">
+                    <h3>📊 Dashboard</h3>
+                    <p>Persönliche Statistiken und Übersicht über eingereichte Empfehlungen</p>
+                </div>
+                
+                <div class="feature">
+                    <h3>💰 Bonus-System</h3>
+                    <p>Automatische Berechnung und Tracking von Empfehlungs-Boni</p>
+                </div>
+                
+                <div class="feature">
+                    <h3>🔒 Sicherheit</h3>
+                    <p>CSRF-Schutz, Input-Validierung und sichere Passwort-Hashing</p>
+                </div>
+                
+                <div class="feature">
+                    <h3>📱 Responsive</h3>
+                    <p>Optimiert für Desktop, Tablet und Mobile-Geräte</p>
+                </div>
+            </div>
+            
+            <div class="demo-section">
+                <h3 style="color: #60a5fa; margin-bottom: 1rem;">🚀 Demo-Zugang</h3>
+                <p style="margin-bottom: 1rem;">Testen Sie die vollständige Anwendung mit dem Admin-Account:</p>
+                
+                <div style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 10px; margin: 1rem 0;">
+                    <strong>Admin-Login:</strong><br>
+                    📧 Email: admin@argo-aviation.com<br>
+                    🔑 Passwort: admin123
+                </div>
+                
+                <button class="demo-login" onclick="window.open('https://argo-referral-dev-webapp-tobias.azurewebsites.net', '_blank')">
+                    🌐 Azure App Service öffnen
+                </button>
+                
+                <button class="demo-login" onclick="showLocalInstructions()">
+                    💻 Lokale Installation
+                </button>
+            </div>
+            
+            <div class="deployment-status">
+                <h4 style="color: #10b981; margin-bottom: 0.5rem;">✅ Deployment Status</h4>
+                <p><strong>Azure App Service:</strong> Aktiv und verfügbar</p>
+                <p><strong>GitHub Repository:</strong> Aktuell und synchronisiert</p>
+                <p><strong>Letzte Aktualisierung:</strong> <span id="current-time"></span></p>
+            </div>
+            
+            <div class="info-text">
+                <h4 style="color: #3b82f6; margin-bottom: 0.5rem;">ℹ️ Technische Details</h4>
+                <p>Die Anwendung wurde vollständig überarbeitet mit modernem Design, verbesserter Sicherheit und Windows-Kompatibilität. Alle Tests bestehen erfolgreich.</p>
+            </div>
+            
+            <div class="tech-stack">
+                <span class="tech-item">🐍 Python 3.11</span>
+                <span class="tech-item">🌶️ Flask</span>
+                <span class="tech-item">🗄️ SQLAlchemy</span>
+                <span class="tech-item">🎨 CSS3</span>
+                <span class="tech-item">☁️ Azure</span>
+                <span class="tech-item">🔧 GitHub Actions</span>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Aktuelle Zeit anzeigen
+        document.getElementById('current-time').textContent = new Date().toLocaleString('de-DE');
+        
+        function showLocalInstructions() {
+            alert(`🖥️ Lokale Installation:
+
+1. Repository klonen:
+   git clone https://github.com/tibo47-161/argo-aviation-referral-portal.git
+
+2. Abhängigkeiten installieren:
+   pip install -r requirements.txt
+
+3. App starten:
+   python run.py
+
+4. Browser öffnen:
+   http://localhost:5001
+
+Windows-Nutzer können die .bat-Skripte verwenden:
+- deploy_windows.bat (Installation)
+- start_windows.bat (Start)`);
+        }
+        
+        // Animationen
+        document.addEventListener('DOMContentLoaded', function() {
+            const card = document.querySelector('.status-card');
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(50px)';
+            
+            setTimeout(() => {
+                card.style.transition = 'all 1s ease';
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, 100);
+        });
+    </script>
+</body>
+</html>
