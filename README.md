@@ -55,4 +55,4 @@ Ein professionelles Referral-Portal für Argo Aviation, entwickelt als Teil eine
 Bei Fragen erstellen Sie ein Issue im GitHub-Repository.
 
 ---
-**Entwickelt für Argo Aviation | IHK-Abschlussarbeit 2025**
+**Entwickelt für Argo Aviation | IHK-Abschlussarbeit 2025**# Railway deployment fix - Thu Oct  2 09:30:13 EDT 2025
