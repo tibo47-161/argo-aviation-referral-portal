@@ -20,7 +20,7 @@ stages:
 
     - script: |
         python -m pip install --upgrade pip
-        pip install -r requirements.txt
+        pip install -r requirements_azure.txt
       displayName: 'Abhängigkeiten installieren'
       workingDirectory: '$(Build.SourcesDirectory)' # Stellt sicher, dass requirements.txt im Repo-Root gefunden wird
 
@@ -56,7 +56,7 @@ stages:
               appType: 'webAppLinux' # Wichtig: Bestätigen Sie dies in Ihrem Azure App Service (Konfiguration -> Stapelsatzeinstellungen). Ändern Sie zu 'webApp', falls es Windows ist.
               appName: 'argo-referral-dev-webapp-tobias' # Name Ihres Dev App Service
               package: '$(Pipeline.Workspace)/drop/*.zip'
-              startupCommand: 'gunicorn --bind 0.0.0.0:8000 app:app' # <--- ANGEPASST FÜR FLASK!
+              startupCommand: 'gunicorn --bind 0.0.0.0:8000 run:app' # <--- KORRIGIERT: run.py ist der Einstiegspunkt
 
 # === DEPLOY TO MVP STAGE ===
 - stage: DeployMVP
@@ -78,4 +78,4 @@ stages:
               appType: 'webAppLinux' # Wichtig: Bestätigen Sie dies auch für Ihren MVP App Service.
               appName: 'argo-referral-mvp-webapp-tobias-20250709' # Name Ihres MVP App Service
               package: '$(Pipeline.Workspace)/drop/*.zip'
-              startupCommand: 'gunicorn --bind 0.0.0.0:8000 app:app' # <--- ANGEPASST FÜR FLASK!
+              startupCommand: 'gunicorn --bind 0.0.0.0:8000 run:app' # <--- KORRIGIERT: run.py ist der Einstiegspunkt
