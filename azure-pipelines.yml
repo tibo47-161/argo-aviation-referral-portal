@@ -56,7 +56,7 @@ stages:
               appType: 'webAppLinux' # Wichtig: Bestätigen Sie dies in Ihrem Azure App Service (Konfiguration -> Stapelsatzeinstellungen). Ändern Sie zu 'webApp', falls es Windows ist.
               appName: 'argo-referral-dev-webapp-tobias' # Name Ihres Dev App Service
               package: '$(Pipeline.Workspace)/drop/*.zip'
-              startupCommand: 'gunicorn --bind 0.0.0.0:8000 --timeout 120 run_safe:app' # <--- Sichere Version mit Fallback
+              startupCommand: 'gunicorn --bind 0.0.0.0:8000 --timeout 60 app_simple:app' # <--- Vereinfachte vollständige App
 
 # === DEPLOY TO MVP STAGE ===
 - stage: DeployMVP
@@ -78,4 +78,4 @@ stages:
               appType: 'webAppLinux' # Wichtig: Bestätigen Sie dies auch für Ihren MVP App Service.
               appName: 'argo-referral-mvp-webapp-tobias-20250709' # Name Ihres MVP App Service
               package: '$(Pipeline.Workspace)/drop/*.zip'
-              startupCommand: 'gunicorn --bind 0.0.0.0:8000 --timeout 120 run_safe:app' # <--- Sichere Version mit Fallback
+              startupCommand: 'gunicorn --bind 0.0.0.0:8000 --timeout 60 app_simple:app' # <--- Vereinfachte vollständige App
