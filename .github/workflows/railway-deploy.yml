@@ -1,0 +1,128 @@
+name: 🚂 Deploy to Railway (Backup)
+
+on:
+  workflow_dispatch:
+    inputs:
+      deploy_target:
+        description: 'Deployment target'
+        required: true
+        default: 'railway'
+        type: choice
+        options:
+        - railway
+        - render
+        - heroku
+
+jobs:
+  deploy-railway:
+    runs-on: ubuntu-latest
+    if: github.event.inputs.deploy_target == 'railway' || github.event.inputs.deploy_target == ''
+    
+    steps:
+    - name: 📥 Checkout
+      uses: actions/checkout@v4
+      
+    - name: 🚂 Deploy to Railway
+      uses: bervProject/railway-deploy@v1.0.0
+      with:
+        railway_token: ${{ secrets.RAILWAY_TOKEN }}
+        service: argo-aviation-referral-portal
+        
+  deploy-render:
+    runs-on: ubuntu-latest
+    if: github.event.inputs.deploy_target == 'render'
+    
+    steps:
+    - name: 📥 Checkout
+      uses: actions/checkout@v4
+      
+    - name: 🎨 Deploy to Render
+      run: |
+        echo "Deploying to Render..."
+        # Render deployment würde hier konfiguriert werden
+        
+  create-standalone:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout
+      uses: actions/checkout@v4
+      
+    - name: 📦 Create Standalone Package
+      run: |
+        # Erstelle ein vollständiges, eigenständiges Paket
+        mkdir -p standalone-app
+        cp app_simple.py standalone-app/
+        
+        # Erstelle Docker-Setup
+        cat > standalone-app/Dockerfile << EOF
+        FROM python:3.11-slim
+        
+        WORKDIR /app
+        
+        COPY app_simple.py .
+        
+        RUN pip install Flask==2.3.3 Flask-SQLAlchemy==3.0.5 Werkzeug==2.3.7
+        
+        EXPOSE 8000
+        
+        CMD ["python", "app_simple.py"]
+        EOF
+        
+        # Erstelle docker-compose.yml
+        cat > standalone-app/docker-compose.yml << EOF
+        version: '3.8'
+        services:
+          argo-app:
+            build: .
+            ports:
+              - "8000:8000"
+            environment:
+              - FLASK_ENV=production
+              - PORT=8000
+        EOF
+        
+        # Erstelle README
+        cat > standalone-app/README.md << EOF
+        # Argo Aviation Referral Portal - Standalone
+        
+        ## Quick Start with Docker
+        \`\`\`bash
+        docker-compose up -d
+        \`\`\`
+        
+        ## Manual Start
+        \`\`\`bash
+        pip install Flask Flask-SQLAlchemy Werkzeug
+        python app_simple.py
+        \`\`\`
+        
+        App will be available at: http://localhost:8000
+        
+        Default admin login:
+        - Email: admin@argo-aviation.com
+        - Password: admin123
+        EOF
+        
+    - name: 📤 Upload Standalone Package
+      uses: actions/upload-artifact@v3
+      with:
+        name: argo-aviation-standalone
+        path: standalone-app/
+        
+    - name: 📋 Deployment Summary
+      run: |
+        echo "## 🚀 Deployment Options Created" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Available Deployment Methods:" >> $GITHUB_STEP_SUMMARY
+        echo "- 🌐 **Azure App Service** (Primary)" >> $GITHUB_STEP_SUMMARY
+        echo "- 🌟 **Vercel** (Alternative)" >> $GITHUB_STEP_SUMMARY
+        echo "- 🚂 **Railway** (Backup)" >> $GITHUB_STEP_SUMMARY
+        echo "- 🐳 **Docker** (Standalone)" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Quick Test URLs:" >> $GITHUB_STEP_SUMMARY
+        echo "- Azure Dev: https://argo-referral-dev-webapp-tobias.azurewebsites.net" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Admin Access:" >> $GITHUB_STEP_SUMMARY
+        echo "- Email: admin@argo-aviation.com" >> $GITHUB_STEP_SUMMARY
+        echo "- Password: admin123" >> $GITHUB_STEP_SUMMARY
