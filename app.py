@@ -22,7 +22,7 @@ db = SQLAlchemy(app)
 
 # SendGrid configuration
 SENDGRID_API_KEY = "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"
-FROM_EMAIL = "noreply@argo-aviation.com"
+FROM_EMAIL = "tobias.buss@argo.work"
 FROM_NAME = "Argo Aviation Referral Portal"
 
 # Database Models
