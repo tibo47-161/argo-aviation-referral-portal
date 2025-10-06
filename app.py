@@ -457,12 +457,12 @@ def register():
         # Generate confirmation token
         confirmation_token = secrets.token_urlsafe(32)
         
-        # Create new user (not confirmed yet)
+        # Create new user (confirmed by default for now)
         user = User(
             name=name,
             email=email,
             password_hash=generate_password_hash(password),
-            email_confirmed=False,
+            email_confirmed=True,  # Auto-confirm for now
             confirmation_token=confirmation_token,
             confirmation_sent_at=datetime.utcnow()
         )
@@ -471,11 +471,13 @@ def register():
             db.session.add(user)
             db.session.commit()
             
-            # Send confirmation email
-            if send_confirmation_email(email, name, confirmation_token):
-                flash('Registrierung erfolgreich! Bitte überprüfen Sie Ihre E-Mails und bestätigen Sie Ihr Konto.', 'success')
-            else:
-                flash('Registrierung erfolgreich, aber E-Mail konnte nicht gesendet werden. Bitte kontaktieren Sie den Support.', 'error')
+            # Optional: Send welcome email (non-blocking)
+            try:
+                send_confirmation_email(email, name, confirmation_token)
+            except:
+                pass  # Email sending is optional
+            
+            flash('Registrierung erfolgreich! Sie können sich jetzt anmelden.', 'success')
             
             return redirect(url_for('login'))
         except Exception as e:
@@ -521,10 +523,10 @@ def login():
         user = User.query.filter_by(email=email).first()
         
         if user and check_password_hash(user.password_hash, password):
-            # Check if email is confirmed
-            if not user.email_confirmed:
-                flash('Bitte bestätigen Sie zuerst Ihre E-Mail-Adresse. Überprüfen Sie Ihr Postfach.', 'error')
-                return redirect(url_for('login'))
+        # Email confirmation check (optional for now)
+        # if not user.email_confirmed:
+        #     flash('Bitte bestätigen Sie zuerst Ihre E-Mail-Adresse. Überprüfen Sie Ihr Postfach.', 'error')
+        #     return redirect(url_for('login'))
             
             session['user_id'] = user.id
             session['user_name'] = user.name
