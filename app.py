@@ -824,7 +824,16 @@ def logout():
 # Initialize database and sample data
 def init_db():
     with app.app_context():
+        # For email confirmation feature, we need to recreate the database
+        # This ensures all new fields are properly added
+        import os
+        db_path = 'argo_referral.db'
+        if os.path.exists(db_path):
+            print("Recreating database for email confirmation feature...")
+            os.remove(db_path)
+        
         db.create_all()
+        print("Database created with email confirmation support!")
         
         # Add sample jobs if none exist
         if Job.query.count() == 0:
