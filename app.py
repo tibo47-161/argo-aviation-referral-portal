@@ -8,7 +8,10 @@ from flask import Flask, request, redirect, url_for, session, flash, render_temp
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
+import secrets
+import sendgrid
+from sendgrid.helpers.mail import Mail, Email, To, Content
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'argo-aviation-secret-key-2024'
@@ -16,6 +19,11 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///argo_referral.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
+
+# SendGrid configuration
+SENDGRID_API_KEY = "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"
+FROM_EMAIL = "noreply@argo-aviation.com"
+FROM_NAME = "Argo Aviation Referral Portal"
 
 # Database Models
 class User(db.Model):
@@ -25,6 +33,10 @@ class User(db.Model):
     password_hash = db.Column(db.String(200), nullable=False)
     is_admin = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    # Email confirmation fields
+    email_confirmed = db.Column(db.Boolean, default=False)
+    confirmation_token = db.Column(db.String(100), nullable=True)
+    confirmation_sent_at = db.Column(db.DateTime, nullable=True)
 
 class Job(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -317,6 +329,64 @@ BASE_TEMPLATE = '''
 </html>
 '''
 
+def send_confirmation_email(user_email, user_name, confirmation_token):
+    """Send email confirmation to new user"""
+    try:
+        sg = sendgrid.SendGridAPIClient(api_key=SENDGRID_API_KEY)
+        
+        confirmation_url = f"https://web-production-9c059.up.railway.app/confirm-email/{confirmation_token}"
+        
+        html_content = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <style>
+                body {{ font-family: Arial, sans-serif; margin: 0; padding: 20px; background-color: #f5f5f5; }}
+                .container {{ max-width: 600px; margin: 0 auto; background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }}
+                .header {{ background: linear-gradient(135deg, #DAA520, #B8860B); color: #2F2F2F; padding: 20px; text-align: center; border-radius: 5px; margin-bottom: 20px; }}
+                .content {{ color: #333; line-height: 1.6; }}
+                .button {{ display: inline-block; background: linear-gradient(135deg, #DAA520, #B8860B); color: #2F2F2F; padding: 12px 30px; text-decoration: none; border-radius: 5px; margin: 20px 0; font-weight: bold; }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1>🛩️ Argo Aviation</h1>
+                    <p>Referral Portal - E-Mail Bestätigung</p>
+                </div>
+                <div class="content">
+                    <h2>Willkommen, {user_name}!</h2>
+                    <p>Vielen Dank für Ihre Registrierung beim Argo Aviation Referral Portal.</p>
+                    <p>Um Ihr Konto zu aktivieren, klicken Sie bitte auf den folgenden Button:</p>
+                    
+                    <a href="{confirmation_url}" class="button">E-Mail Adresse bestätigen</a>
+                    
+                    <p>Falls der Button nicht funktioniert, kopieren Sie diesen Link in Ihren Browser:</p>
+                    <p style="word-break: break-all; color: #666;">{confirmation_url}</p>
+                    
+                    <p><strong>Wichtig:</strong> Dieser Link ist 24 Stunden gültig.</p>
+                    
+                    <p>Mit freundlichen Grüßen,<br>
+                    Ihr Argo Aviation Team</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+        
+        from_email = Email(FROM_EMAIL, FROM_NAME)
+        to_email = To(user_email)
+        subject = "Argo Aviation - E-Mail Bestätigung erforderlich"
+        
+        mail = Mail(from_email, to_email, subject, Content("text/html", html_content))
+        
+        response = sg.send(mail)
+        print(f"Email sent successfully. Status code: {response.status_code}")
+        return True
+    except Exception as e:
+        print(f"Email error: {e}")
+        return False
+
 # Routes
 @app.route('/')
 def index():
@@ -384,17 +454,29 @@ def register():
             flash('E-Mail-Adresse bereits registriert!', 'error')
             return redirect(url_for('register'))
         
-        # Create new user
+        # Generate confirmation token
+        confirmation_token = secrets.token_urlsafe(32)
+        
+        # Create new user (not confirmed yet)
         user = User(
             name=name,
             email=email,
-            password_hash=generate_password_hash(password)
+            password_hash=generate_password_hash(password),
+            email_confirmed=False,
+            confirmation_token=confirmation_token,
+            confirmation_sent_at=datetime.utcnow()
         )
         
         try:
             db.session.add(user)
             db.session.commit()
-            flash('Registrierung erfolgreich! Sie können sich jetzt anmelden.', 'success')
+            
+            # Send confirmation email
+            if send_confirmation_email(email, name, confirmation_token):
+                flash('Registrierung erfolgreich! Bitte überprüfen Sie Ihre E-Mails und bestätigen Sie Ihr Konto.', 'success')
+            else:
+                flash('Registrierung erfolgreich, aber E-Mail konnte nicht gesendet werden. Bitte kontaktieren Sie den Support.', 'error')
+            
             return redirect(url_for('login'))
         except Exception as e:
             db.session.rollback()
@@ -439,6 +521,11 @@ def login():
         user = User.query.filter_by(email=email).first()
         
         if user and check_password_hash(user.password_hash, password):
+            # Check if email is confirmed
+            if not user.email_confirmed:
+                flash('Bitte bestätigen Sie zuerst Ihre E-Mail-Adresse. Überprüfen Sie Ihr Postfach.', 'error')
+                return redirect(url_for('login'))
+            
             session['user_id'] = user.id
             session['user_name'] = user.name
             session['is_admin'] = user.is_admin
@@ -797,6 +884,34 @@ def init_db():
             
             db.session.commit()
             print("Sample jobs added successfully!")
+
+@app.route('/confirm-email/<token>')
+def confirm_email(token):
+    """Confirm user email with token"""
+    user = User.query.filter_by(confirmation_token=token).first()
+    
+    if not user:
+        flash('Ungültiger oder abgelaufener Bestätigungslink.', 'error')
+        return redirect(url_for('login'))
+    
+    # Check if token is expired (24 hours)
+    if user.confirmation_sent_at and datetime.utcnow() - user.confirmation_sent_at > timedelta(hours=24):
+        flash('Der Bestätigungslink ist abgelaufen. Bitte registrieren Sie sich erneut.', 'error')
+        return redirect(url_for('register'))
+    
+    # Confirm the user
+    user.email_confirmed = True
+    user.confirmation_token = None
+    user.confirmation_sent_at = None
+    
+    try:
+        db.session.commit()
+        flash('E-Mail erfolgreich bestätigt! Sie können sich jetzt anmelden.', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash('Fehler bei der E-Mail-Bestätigung. Bitte versuchen Sie es erneut.', 'error')
+    
+    return redirect(url_for('login'))
 
 if __name__ == '__main__':
     init_db()
