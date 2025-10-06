@@ -1,6 +1,7 @@
 """
 Argo Aviation Referral Portal - FIXED VERSION
 Completely working version with proper URL routing and Argo colors
+Updated: 2025-01-06 - Template rendering fix
 """
 
 from flask import Flask, request, redirect, url_for, session, flash, render_template_string
